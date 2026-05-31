@@ -1,0 +1,14 @@
+# Maven
+backend/target/
+backend/.mvn/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Claude Code session
+.claude/
+
+# Logs
+*.log
