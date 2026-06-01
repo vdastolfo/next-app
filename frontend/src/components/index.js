@@ -1,11 +1,11 @@
 import React from 'react';
 import {
   TouchableOpacity, Text, StyleSheet, View,
-  TextInput, ActivityIndicator, Image
+  ActivityIndicator
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
-import Svg, { Path, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 // ── LOGO NEXT (triángulo verde con texto) ────────────────────────────────────
 export function NextLogo({ size = 80, showText = true }) {

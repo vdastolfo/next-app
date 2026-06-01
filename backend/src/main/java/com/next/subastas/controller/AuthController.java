@@ -31,8 +31,4 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/check")
-    public ResponseEntity<?> check() {
-        return ResponseEntity.ok(Map.of("status", "Token válido"));
-    }
 }
