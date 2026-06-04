@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../services/AuthContext';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
-
+import RegisterScreen from '../screens/RegisterScreen';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
@@ -117,11 +117,9 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {user ? (
-          <Stack.Screen name="Main" component={MainTabs} />
-        ) : (
-          <Stack.Screen name="Login" component={LoginScreen} />
-        )}
+        <Stack.Screen name="Main" component={MainTabs} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

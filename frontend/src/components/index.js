@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   TouchableOpacity, Text, StyleSheet, View,
-  ActivityIndicator
+  ActivityIndicator, TextInput
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SIZES } from '../constants/theme';

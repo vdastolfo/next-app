@@ -44,6 +44,7 @@ export default function LoginScreen({ navigation }) {
 
     try {
       await login(email.trim().toLowerCase(), password);
+      navigation.navigate('Main');
       // La navegación la maneja el Navigator según el estado de auth
     } catch (error) {
       if (error.isNetworkError) {
@@ -155,7 +156,11 @@ export default function LoginScreen({ navigation }) {
           <View style={styles.footerBg} />
           <Text style={styles.footerText}>
             ¿No tienes una cuenta?{' '}
-            <Text style={styles.footerLink}>Crear cuenta</Text>
+            <Text style={styles.footerLink}
+            onPress={() => navigation.navigate('Register')}
+            >
+              Crear cuenta
+            </Text>
           </Text>
         </View>
       </ScrollView>

@@ -4,6 +4,7 @@ import {
   TextInput, Modal, Animated, ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../services/AuthContext';
 import { auctionsAPI } from '../services/api';
 import { PrimaryButton, LoadingScreen } from '../components';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
@@ -11,6 +12,7 @@ import { COLORS, FONTS, SIZES } from '../constants/theme';
 // ── DETALLE DEL PRODUCTO (frame 07) ──────────────────────────────────────────
 export default function ProductDetailScreen({ route, navigation }) {
   const { itemId } = route.params;
+  const { user } = useAuth();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,6 +44,14 @@ export default function ProductDetailScreen({ route, navigation }) {
     setTimeLeft({ hrs: '00', min: '01', sec: '34' });
     return () => clearInterval(timer);
   }, []);
+
+  const handlePujar = () => {
+  if (!user) {
+    navigation.navigate('Login');
+      return;
+    }
+    setShowBidModal(true);
+  };
 
   const loadItem = async () => {
     try {
@@ -123,7 +133,7 @@ export default function ProductDetailScreen({ route, navigation }) {
           {/* Botón PUJAR sobre imagen */}
           <TouchableOpacity
             style={styles.pujiarOverBtn}
-            onPress={() => setShowBidModal(true)}
+            onPress={handlePujar}
           >
             <Text style={styles.pujiarOverBtnText}>PUJAR ⬆</Text>
           </TouchableOpacity>
@@ -183,7 +193,7 @@ export default function ProductDetailScreen({ route, navigation }) {
       <View style={styles.bottomBar}>
         <PrimaryButton
           title="PUJAR ⬆"
-          onPress={() => setShowBidModal(true)}
+          onPress={handlePujar}
           disabled={item.subastado === 'si'}
         />
       </View>
