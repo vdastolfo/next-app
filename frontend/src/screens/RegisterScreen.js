@@ -3,13 +3,11 @@ import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { useAuth } from '../services/AuthContext';
 import { Input, PrimaryButton, NextLogo } from '../components';
 import { authAPI } from '../services/api';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 
 export default function RegisterScreen({ navigation }) {
-  const { login } = useAuth();
 
   const [form, setForm] = useState({
     nombre: '',
@@ -73,8 +71,7 @@ export default function RegisterScreen({ navigation }) {
         password: form.password,
       });
 
-      // Login automático tras registro exitoso
-      await login(form.email.trim().toLowerCase(), form.password);
+      navigation.navigate('Verify', { email: form.email.trim().toLowerCase() });
     } catch (error) {
       if (error.isNetworkError) {
         setErrors({ general: 'Sin conexión a internet. Verificá tu red.' });

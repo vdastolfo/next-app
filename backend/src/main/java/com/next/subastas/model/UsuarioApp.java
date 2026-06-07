@@ -20,6 +20,11 @@ public class UsuarioApp {
     @Column(name = "fechaCreacion")
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 
+    @Column(length = 6)
+    private String codigoVerificacion;
+
+    private LocalDateTime codigoExpiracion;
+
     public Integer getIdentificador() { return identificador; }
     public void setIdentificador(Integer identificador) { this.identificador = identificador; }
     public Cliente getCliente() { return cliente; }
@@ -32,4 +37,8 @@ public class UsuarioApp {
     public void setActivo(String activo) { this.activo = activo; }
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+    public String getCodigoVerificacion() { return codigoVerificacion; }
+    public void setCodigoVerificacion(String codigoVerificacion) { this.codigoVerificacion = codigoVerificacion; }
+    public LocalDateTime getCodigoExpiracion() { return codigoExpiracion; }
+    public void setCodigoExpiracion(LocalDateTime codigoExpiracion) { this.codigoExpiracion = codigoExpiracion; }
 }

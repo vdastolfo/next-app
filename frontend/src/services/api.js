@@ -45,6 +45,10 @@ export const authAPI = {
     api.post('/auth/login', { email, password }),
   register: (data) =>
     api.post('/auth/register', data),
+  verify: (email, codigo) =>
+    api.post('/auth/verify', { email, codigo }),
+  resendCode: (email) =>
+    api.post('/auth/resend-code', { email }),
 };
 
 // ── SUBASTAS ──────────────────────────────────────────────────────────────────

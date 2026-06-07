@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../services/AuthContext';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import RegisterScreen from '../screens/RegisterScreen';
+import VerificationScreen from '../screens/VerificationScreen';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
@@ -120,6 +121,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="Verify" component={VerificationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
