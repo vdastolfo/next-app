@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Cambiá esta IP por la de tu computadora cuando pruebes en el celular
 // Para el emulador/Expo Go en la misma red: usá tu IP local (ej: 192.168.1.x)
 // Para web/emulador Android: http://10.0.2.2:8080
-const BASE_URL = 'http://10.0.2.2:8082/api';
+const BASE_URL = 'http://10.0.2.2:8080/api';
 
 const api = axios.create({
   baseURL: BASE_URL,

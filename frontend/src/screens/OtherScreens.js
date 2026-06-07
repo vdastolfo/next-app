@@ -246,7 +246,7 @@ export function ProfileScreen({ navigation }) {
         {/* Logout */}
         <TouchableOpacity 
           style={profileStyles.logoutBtn} 
-          onPress={async () => { await logout(); navigation.navigate('Login'); }}
+          onPress={async () => { await logout(); navigation.reset({ index: 0, routes: [{ name: 'Main' }] }); }}
         >
           <Text style={profileStyles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
