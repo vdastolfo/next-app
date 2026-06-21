@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,11 +26,46 @@ public class SubastaService {
     @Autowired private AsistenteRepository asistenteRepository;
     @Autowired private UsuarioAppRepository usuarioAppRepository;
     @Autowired private MedioDePagoRepository medioDePagoRepository;
+    @Autowired private ClienteRepository clienteRepository;
     @Autowired private FotoRepository fotoRepository;
     @Autowired private PiezaRepository piezaRepository;
     @Autowired private CatalogoRepository catalogoRepository;
     @Autowired private SimpMessagingTemplate messagingTemplate;
     @Autowired private EmailService emailService;
+
+    private static final List<String> CATEGORY_ORDER =
+            List.of("comun", "especial", "plata", "oro", "platino");
+
+    private List<String> getCategoriasAccesibles(String categoria) {
+        int nivel = CATEGORY_ORDER.indexOf(categoria);
+        if (nivel < 0) return List.of("comun");
+        return CATEGORY_ORDER.subList(0, nivel + 1);
+    }
+
+    private String getSiguienteCategoria(String categoria) {
+        int nivel = CATEGORY_ORDER.indexOf(categoria);
+        return (nivel >= 0 && nivel < CATEGORY_ORDER.size() - 1)
+                ? CATEGORY_ORDER.get(nivel + 1) : null;
+    }
+
+    private void evaluarUpgradeCategoria(Cliente cliente, List<Pujo> todosPujos) {
+        String categoriaActual = cliente.getCategoria();
+        String siguiente = getSiguienteCategoria(categoriaActual);
+        if (siguiente == null) return;
+
+        long ganadosEnCategoria = todosPujos.stream()
+                .filter(p -> "si".equals(p.getGanador()))
+                .filter(p -> categoriaActual.equals(p.getAsistente().getSubasta().getCategoria()))
+                .count();
+        if (ganadosEnCategoria < 3) return;
+
+        long mediosVerificados = medioDePagoRepository
+                .countByClienteIdentificadorAndVerificado(cliente.getIdentificador(), "si");
+        if (mediosVerificados < 3) return;
+
+        cliente.setCategoria(siguiente);
+        clienteRepository.save(cliente);
+    }
 
     // ---- Listar subastas accesibles para el usuario ----
     public List<SubastaResumenDTO> listarSubastas(String emailUsuario) {
@@ -139,15 +176,22 @@ public class SubastaService {
             throw new RuntimeException("Necesitás al menos un medio de pago verificado para pujar.");
         }
 
-        // Obtener la subasta del ítem
-        // El ítem pertenece a un catálogo, el catálogo pertenece a una subasta
-        // (simplificado: buscamos el asistente por cliente y primera subasta disponible)
+        // Obtener la subasta del ítem y auto-registrar al cliente como asistente si no lo está
+        Integer subastaId = getCatalogoSubastaId(item);
+        Subasta subastaDelItem = subastaRepository.findById(subastaId)
+                .orElseThrow(() -> new RuntimeException("Subasta no encontrada"));
+
         Asistente asistente = asistenteRepository
                 .findByClienteIdentificadorAndSubastaIdentificador(
-                    cliente.getIdentificador(),
-                    getCatalogoSubastaId(item)
-                )
-                .orElseThrow(() -> new RuntimeException("No estás registrado en esta subasta."));
+                    cliente.getIdentificador(), subastaId)
+                .orElseGet(() -> {
+                    long nroPostor = asistenteRepository.countBySubastaIdentificador(subastaId) + 1;
+                    Asistente nuevo = new Asistente();
+                    nuevo.setCliente(cliente);
+                    nuevo.setSubasta(subastaDelItem);
+                    nuevo.setNumeroPostor((int) nroPostor);
+                    return asistenteRepository.save(nuevo);
+                });
 
         // Verificar que el ítem sea el que está siendo subastado ahora
         Subasta subastaActual = asistente.getSubasta();
@@ -285,6 +329,12 @@ public class SubastaService {
         if (!medio.getCliente().getIdentificador().equals(clienteId)) {
             throw new RuntimeException("El medio de pago no pertenece al usuario");
         }
+
+        String monedaSubasta = pujo.getAsistente().getSubasta().getMoneda();
+        if ("dolares".equals(monedaSubasta) && "cheque".equals(medio.getTipo())) {
+            throw new RuntimeException("Las subastas en dólares solo pueden abonarse con tarjeta de crédito o cuenta bancaria.");
+        }
+
         pujo.setEstadoPago("pagado");
         pujo.setEstadoPaquete("empaquetado");
         pujo.setMedioDePago(medio);
@@ -379,9 +429,12 @@ public class SubastaService {
             }
         }
 
-        // Marcar ítem como subastado
+        // Marcar ítem como subastado; si no hubo pujas, la empresa lo adquiere al valor base
         itemCatalogoRepository.findById(currentItemId).ifPresent(item -> {
             item.setSubastado("si");
+            if (mejorPuja == null) {
+                item.setCompradoPorEmpresa(true);
+            }
             itemCatalogoRepository.save(item);
         });
 
@@ -389,6 +442,121 @@ public class SubastaService {
         List<ItemCatalogo> restantes = itemCatalogoRepository.findItemsActivosBySubasta(subastaId);
         Integer siguienteId = restantes.isEmpty() ? null : restantes.get(0).getIdentificador();
         setItemActivo(subastaId, siguienteId);
+    }
+
+    // ---- Métricas de participación del usuario ----
+    public ParticipacionesDTO getParticipaciones(String emailUsuario) {
+        UsuarioApp usuario = usuarioAppRepository.findByEmail(emailUsuario).orElseThrow();
+        Cliente cliente = usuario.getCliente();
+        Integer clienteId = cliente.getIdentificador();
+
+        String categoriaAntes = cliente.getCategoria();
+
+        // Traer TODAS las pujas sin filtro — se usan para evaluar el upgrade
+        List<Pujo> todosPujosRaw = pujoRepository.findAllByCliente(clienteId);
+
+        // Evaluar y aplicar upgrade si corresponde
+        evaluarUpgradeCategoria(cliente, todosPujosRaw);
+
+        String categoriaActual = cliente.getCategoria();
+        boolean subioCategoria = !categoriaAntes.equals(categoriaActual);
+
+        // Categorías visibles para este nivel (acumulativas)
+        List<String> accesibles = getCategoriasAccesibles(categoriaActual);
+
+        // Filtrar asistentes y pujas por categorías accesibles al nivel actual
+        List<com.next.subastas.model.Asistente> asistentes =
+                asistenteRepository.findByClienteIdentificador(clienteId).stream()
+                        .filter(a -> accesibles.contains(a.getSubasta().getCategoria()))
+                        .collect(Collectors.toList());
+
+        List<Pujo> todosPujos = todosPujosRaw.stream()
+                .filter(p -> accesibles.contains(p.getAsistente().getSubasta().getCategoria()))
+                .collect(Collectors.toList());
+
+        // Métricas globales
+        int subastasAsistidas = asistentes.size();
+        int itemsGanados = (int) todosPujos.stream().filter(p -> "si".equals(p.getGanador())).count();
+        int itemsPujados = (int) todosPujos.stream()
+                .map(p -> p.getItem().getIdentificador()).distinct().count();
+        double winRate = itemsPujados > 0
+                ? Math.round(itemsGanados * 1000.0 / itemsPujados) / 10.0 : 0.0;
+
+        BigDecimal totalOfertado = todosPujos.stream()
+                .map(Pujo::getImporte).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalPagado = todosPujos.stream()
+                .filter(p -> "si".equals(p.getGanador()))
+                .map(Pujo::getImporte).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Por categoría (orden jerárquico)
+        java.util.Map<String, List<com.next.subastas.model.Asistente>> porCat = asistentes.stream()
+                .collect(Collectors.groupingBy(a -> a.getSubasta().getCategoria()));
+
+        List<ParticipacionesDTO.MetricaCategoria> metricasCat = porCat.entrySet().stream()
+                .map(e -> {
+                    java.util.Set<Integer> ids = e.getValue().stream()
+                            .map(a -> a.getSubasta().getIdentificador())
+                            .collect(java.util.stream.Collectors.toSet());
+                    List<Pujo> pCat = todosPujos.stream()
+                            .filter(p -> ids.contains(p.getAsistente().getSubasta().getIdentificador()))
+                            .collect(Collectors.toList());
+                    ParticipacionesDTO.MetricaCategoria mc = new ParticipacionesDTO.MetricaCategoria();
+                    mc.setCategoria(e.getKey());
+                    mc.setSubastasAsistidas(e.getValue().size());
+                    mc.setItemsGanados((int) pCat.stream().filter(p -> "si".equals(p.getGanador())).count());
+                    mc.setItemsPujados((int) pCat.stream()
+                            .map(p -> p.getItem().getIdentificador()).distinct().count());
+                    mc.setTotalOfertado(pCat.stream().map(Pujo::getImporte)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add));
+                    mc.setTotalPagado(pCat.stream().filter(p -> "si".equals(p.getGanador()))
+                            .map(Pujo::getImporte).reduce(BigDecimal.ZERO, BigDecimal::add));
+                    return mc;
+                })
+                .sorted(java.util.Comparator.comparingInt(
+                        mc -> CATEGORY_ORDER.indexOf(mc.getCategoria())))
+                .collect(Collectors.toList());
+
+        // Historial por subasta (más reciente primero)
+        List<ParticipacionesDTO.HistorialSubasta> historial = asistentes.stream()
+                .map(a -> {
+                    Subasta s = a.getSubasta();
+                    List<Pujo> pSub = todosPujos.stream()
+                            .filter(p -> p.getAsistente().getSubasta().getIdentificador()
+                                    .equals(s.getIdentificador()))
+                            .collect(Collectors.toList());
+                    ParticipacionesDTO.HistorialSubasta h = new ParticipacionesDTO.HistorialSubasta();
+                    h.setSubastaId(s.getIdentificador());
+                    h.setCategoria(s.getCategoria());
+                    h.setFecha(s.getFecha() != null ? s.getFecha().toString() : null);
+                    h.setUbicacion(s.getUbicacion());
+                    h.setMoneda(s.getMoneda());
+                    h.setPujasRealizadas(pSub.size());
+                    h.setItemsPujados((int) pSub.stream()
+                            .map(p -> p.getItem().getIdentificador()).distinct().count());
+                    h.setItemsGanados((int) pSub.stream()
+                            .filter(p -> "si".equals(p.getGanador())).count());
+                    h.setTotalOfertado(pSub.stream().map(Pujo::getImporte)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add));
+                    h.setTotalPagado(pSub.stream().filter(p -> "si".equals(p.getGanador()))
+                            .map(Pujo::getImporte).reduce(BigDecimal.ZERO, BigDecimal::add));
+                    return h;
+                })
+                .sorted(java.util.Comparator.comparing(
+                        ParticipacionesDTO.HistorialSubasta::getSubastaId).reversed())
+                .collect(Collectors.toList());
+
+        ParticipacionesDTO dto = new ParticipacionesDTO();
+        dto.setSubastasAsistidas(subastasAsistidas);
+        dto.setItemsGanados(itemsGanados);
+        dto.setItemsPujados(itemsPujados);
+        dto.setWinRate(winRate);
+        dto.setTotalOfertado(totalOfertado);
+        dto.setTotalPagado(totalPagado);
+        dto.setPorCategoria(metricasCat);
+        dto.setHistorial(historial);
+        dto.setCategoriaActual(categoriaActual);
+        dto.setSubioCategoria(subioCategoria);
+        return dto;
     }
 
     // ---- Helpers privados ----
@@ -404,7 +572,21 @@ public class SubastaService {
         long totalItems = itemCatalogoRepository.countItemsActivosBySubasta(s.getIdentificador());
         long vendidos = itemCatalogoRepository.countVendidosBySubasta(s.getIdentificador());
         dto.setTotalItems((int) totalItems);
-        dto.setEstado(totalItems > 0 && vendidos == totalItems ? "cerrada" : s.getEstado());
+        LocalDate hoy = LocalDate.now();
+        LocalTime ahora = LocalTime.now();
+        boolean esFutura = s.getFecha() != null && (
+            s.getFecha().isAfter(hoy) ||
+            (s.getFecha().isEqual(hoy) && s.getHora() != null && ahora.isBefore(s.getHora()))
+        );
+        String estadoEfectivo;
+        if (esFutura) {
+            estadoEfectivo = "proxima";
+        } else if (totalItems > 0 && vendidos == totalItems) {
+            estadoEfectivo = "cerrada";
+        } else {
+            estadoEfectivo = s.getEstado();
+        }
+        dto.setEstado(estadoEfectivo);
         dto.setSegundosRestantes(calcularSegundosRestantes(s));
         dto.setItemActivoId(s.getItemActivo());
         try {

@@ -9,4 +9,5 @@ public interface MedioDePagoRepository extends JpaRepository<MedioDePago, Intege
         Integer clienteId, String activo
     );
     boolean existsByClienteIdentificadorAndVerificado(Integer clienteId, String verificado);
+    long countByClienteIdentificadorAndVerificado(Integer clienteId, String verificado);
 }

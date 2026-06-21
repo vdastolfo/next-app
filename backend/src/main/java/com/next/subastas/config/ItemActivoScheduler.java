@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,14 @@ public class ItemActivoScheduler {
     }
 
     private void procesarSubasta(Subasta subasta) {
+        // No activar subastas cuya fecha/hora aún no llegó
+        LocalDate hoy = LocalDate.now();
+        LocalTime ahora = LocalTime.now();
+        if (subasta.getFecha() != null) {
+            if (subasta.getFecha().isAfter(hoy)) return;
+            if (subasta.getFecha().isEqual(hoy) && subasta.getHora() != null && ahora.isBefore(subasta.getHora())) return;
+        }
+
         Integer subastaId = subasta.getIdentificador();
 
         if (subasta.getItemActivo() == null) {

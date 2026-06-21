@@ -51,10 +51,16 @@ function AuctionListCard({ subasta, onPress }) {
           <Text style={[cardStyles.catText, { color: catColor }]}>{catLabel}</Text>
         </View>
         <View style={cardStyles.statusRow}>
-          <View style={[cardStyles.statusDot, subasta.estado !== 'abierta' && cardStyles.statusDotClosed]} />
-          <Text style={[cardStyles.statusText, subasta.estado !== 'abierta' && cardStyles.statusTextClosed]}>
-            {subasta.estado === 'abierta' ? 'EN VIVO' : 'FINALIZADA'}
-          </Text>
+          {subasta.estado === 'proxima' ? (
+            <Text style={cardStyles.statusTextProxima}>PRÓXIMA</Text>
+          ) : (
+            <>
+              <View style={[cardStyles.statusDot, subasta.estado !== 'abierta' && cardStyles.statusDotClosed]} />
+              <Text style={[cardStyles.statusText, subasta.estado !== 'abierta' && cardStyles.statusTextClosed]}>
+                {subasta.estado === 'abierta' ? 'EN VIVO' : 'FINALIZADA'}
+              </Text>
+            </>
+          )}
           <Text style={cardStyles.currencyBadge}>{moneda}</Text>
         </View>
       </View>
@@ -130,9 +136,6 @@ export default function HomeScreen({ navigation }) {
         {/* Header */}
         <View style={styles.header}>
           <NextLogo size={40} showText={true} />
-          <TouchableOpacity style={styles.bellBtn}>
-            <Text style={styles.bellIcon}>🔔</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Buscador */}
@@ -263,6 +266,7 @@ const cardStyles = StyleSheet.create({
   statusDotClosed: { backgroundColor: COLORS.textMuted },
   statusText: { color: COLORS.success, fontFamily: FONTS.bodySemiBold, fontSize: SIZES.textXs, letterSpacing: 1 },
   statusTextClosed: { color: COLORS.textMuted },
+  statusTextProxima: { color: '#5B8DEF', fontFamily: FONTS.bodySemiBold, fontSize: SIZES.textXs, letterSpacing: 1 },
   currencyBadge: {
     color: COLORS.textMuted, fontFamily: FONTS.bodySemiBold, fontSize: SIZES.textXs,
     backgroundColor: COLORS.cardAlt, borderRadius: SIZES.radiusSm,

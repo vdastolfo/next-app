@@ -52,6 +52,12 @@ export const authAPI = {
     api.post('/auth/verify', { email, codigo }),
   resendCode: (email) =>
     api.post('/auth/resend-code', { email }),
+  forgotPassword: (email) =>
+    api.post('/auth/forgot-password', { email }),
+  verifyResetCode: (email, codigo) =>
+    api.post('/auth/verify-reset-code', { email, codigo }),
+  resetPassword: (email, codigo, password) =>
+    api.post('/auth/reset-password', { email, codigo, password }),
 };
 
 // ── SUBASTAS ──────────────────────────────────────────────────────────────────
@@ -75,6 +81,7 @@ export const activityAPI = {
   getBidding: () => api.get('/user/activity/bidding'),
   getWon: () => api.get('/user/activity/won'),
   payWon: (pujaId, medioDePagoId) => api.post(`/user/activity/won/${pujaId}/pay`, { medioDePagoId }),
+  getParticipaciones: () => api.get('/user/activity/participaciones'),
 };
 
 // ── MÉTODOS DE PAGO ───────────────────────────────────────────────────────────
@@ -84,6 +91,18 @@ export const paymentAPI = {
   addBankAccount: (data) => api.post('/user/payment-methods/bank-account', data),
   addCheck: (data) => api.post('/user/payment-methods/check', data),
   remove: (id) => api.delete(`/user/payment-methods/${id}`),
+};
+
+export const profileAPI = {
+  getPhoto: () => api.get('/user/profile/photo'),
+  updatePhoto: (foto) => api.put('/user/profile/photo', { foto }, { timeout: 30000 }),
+};
+
+export const consignacionesAPI = {
+  crear: (data) => api.post('/user/consignaciones', data, { timeout: 60000 }),
+  listar: () => api.get('/user/consignaciones'),
+  detalle: (id) => api.get(`/user/consignaciones/${id}`, { timeout: 30000 }),
+  confirmar: (id, acepta) => api.post(`/user/consignaciones/${id}/confirmar`, { acepta }),
 };
 
 export default api;

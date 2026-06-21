@@ -105,4 +105,40 @@ public class AuthController {
             return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
         }
     }
+
+    @PostMapping("/verify-reset-code")
+    public ResponseEntity<?> verifyResetCode(@RequestBody Map<String, String> body) {
+        try {
+            authService.verifyResetCode(body.get("email"), body.get("codigo"));
+            return ResponseEntity.ok(Map.of("message", "Código válido"));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> body) {
+        try {
+            authService.forgotPassword(body.get("email"));
+            return ResponseEntity.ok(Map.of("message", "Código enviado"));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+        try {
+            authService.resetPassword(body.get("email"), body.get("codigo"), body.get("password"));
+            return ResponseEntity.ok(Map.of("message", "Contraseña actualizada"));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
+    }
 }

@@ -115,7 +115,10 @@ export default function LoginScreen({ navigation }) {
             onRightIconPress={() => setShowPassword(!showPassword)}
           />
 
-          <TouchableOpacity style={styles.forgotContainer}>
+          <TouchableOpacity
+            style={styles.forgotContainer}
+            onPress={() => navigation.navigate('ForgotPassword')}
+          >
             <Text style={styles.forgotText}>¿OLVIDASTE TU CONTRASEÑA?</Text>
           </TouchableOpacity>
 

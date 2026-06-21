@@ -70,9 +70,9 @@ export default function AuctionCatalogScreen({ route, navigation }) {
   });
 
   const activeItem = items.find((i) => i.id === activeItemId) ?? null;
-  // Derivar estado de los propios ítems (más fresco que el param de navegación)
   const allSold = items.length > 0 && items.every((i) => i.subastado === 'si');
-  const isFinalized = allSold || subasta.estado === 'cerrada';
+  const isUpcoming = subasta.estado === 'proxima';
+  const isFinalized = !isUpcoming && (allSold || subasta.estado === 'cerrada');
 
   const catColor = CATEGORY_COLORS[subasta.categoria] || COLORS.textMuted;
   const catLabel = CATEGORY_LABELS[subasta.categoria] || subasta.categoria;
@@ -101,14 +101,18 @@ export default function AuctionCatalogScreen({ route, navigation }) {
             <Text style={[styles.catChipText, { color: catColor }]}>{catLabel}</Text>
           </View>
           <Text style={styles.infoDate}>{formatDate(subasta.fecha)} · {formatTime(subasta.hora)}hs</Text>
-          {!isFinalized ? (
+          {isFinalized ? (
+            <View style={styles.closedChip}>
+              <Text style={styles.closedText}>FINALIZADA</Text>
+            </View>
+          ) : isUpcoming ? (
+            <View style={styles.upcomingChip}>
+              <Text style={styles.upcomingText}>PRÓXIMA</Text>
+            </View>
+          ) : (
             <View style={styles.liveChip}>
               <View style={styles.liveDot} />
               <Text style={styles.liveText}>EN VIVO</Text>
-            </View>
-          ) : (
-            <View style={styles.closedChip}>
-              <Text style={styles.closedText}>FINALIZADA</Text>
             </View>
           )}
         </View>
@@ -123,10 +127,16 @@ export default function AuctionCatalogScreen({ route, navigation }) {
         )}
       </View>
 
-      {/* Banner: lote activo o subasta finalizada */}
+      {/* Banner: subasta futura, lote activo, o subasta finalizada */}
       {isFinalized ? (
         <View style={[styles.waitingBanner, { borderLeftColor: COLORS.textMuted }]}>
           <Text style={styles.waitingText}>Esta subasta finalizó. Podés ver todos los lotes subastados.</Text>
+        </View>
+      ) : isUpcoming ? (
+        <View style={[styles.waitingBanner, { borderLeftColor: '#5B8DEF' }]}>
+          <Text style={[styles.waitingText, { color: '#5B8DEF' }]}>
+            La subasta aún no comenzó. Comienza el {formatDate(subasta.fecha)} a las {formatTime(subasta.hora)}hs.
+          </Text>
         </View>
       ) : activeItem ? (
         <TouchableOpacity
@@ -244,6 +254,8 @@ const styles = StyleSheet.create({
   liveText: { color: COLORS.success, fontFamily: FONTS.bodySemiBold, fontSize: SIZES.textXs, letterSpacing: 1 },
   closedChip: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   closedText: { color: COLORS.textMuted, fontFamily: FONTS.bodySemiBold, fontSize: SIZES.textXs, letterSpacing: 1 },
+  upcomingChip: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  upcomingText: { color: '#5B8DEF', fontFamily: FONTS.bodySemiBold, fontSize: SIZES.textXs, letterSpacing: 1 },
 
   activeBanner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

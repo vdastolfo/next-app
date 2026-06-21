@@ -49,4 +49,12 @@ public interface PujoRepository extends JpaRepository<Pujo, Integer> {
         AND p.ganador = 'si'
         """)
     List<Pujo> findPujasGanadoras(@Param("itemId") Integer itemId);
+
+    // Todas las pujas del usuario (para métricas e historial)
+    @Query("""
+        SELECT p FROM Pujo p
+        WHERE p.asistente.cliente.identificador = :clienteId
+        ORDER BY p.fechaHora DESC
+        """)
+    List<Pujo> findAllByCliente(@Param("clienteId") Integer clienteId);
 }

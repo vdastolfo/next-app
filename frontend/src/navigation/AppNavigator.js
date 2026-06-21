@@ -18,6 +18,11 @@ import ProfileScreen from '../screens/ProfileScreen';
 import PaymentMethodsScreen from '../screens/PaymentMethodsScreen';
 import SearchScreen from '../screens/SearchScreen';
 import AuctionCatalogScreen from '../screens/AuctionCatalogScreen';
+import ParticipacionesScreen from '../screens/ParticipacionesScreen';
+import ConsignacionesScreen from '../screens/ConsignacionesScreen';
+import NuevaConsignacionScreen from '../screens/NuevaConsignacionScreen';
+import ConsignacionDetalleScreen from '../screens/ConsignacionDetalleScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -39,6 +44,10 @@ function ProfileStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
+      <Stack.Screen name="Participaciones" component={ParticipacionesScreen} />
+      <Stack.Screen name="Consignaciones" component={ConsignacionesScreen} />
+      <Stack.Screen name="NuevaConsignacion" component={NuevaConsignacionScreen} />
+      <Stack.Screen name="ConsignacionDetalle" component={ConsignacionDetalleScreen} />
     </Stack.Navigator>
   );
 }
@@ -128,6 +137,7 @@ export default function AppNavigator() {
         <Stack.Screen name="CompleteRegistration" component={CompleteRegistrationScreen} />
         <Stack.Screen name="FirstPayment" component={FirstPaymentScreen} />
         <Stack.Screen name="Verify" component={VerificationScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

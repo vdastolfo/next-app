@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Next Subastas — Documentación Técnica</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --primary: #6C63FF;
+    --accent:  #40C4FF;
+    --dark:    #1A1A2E;
+    --mid:     #2D2D44;
+    --light:   #F8F9FF;
+    --border:  #E2E4F0;
+    --text:    #2C2C3E;
+    --muted:   #6B6B8A;
+    --green:   #22C55E;
+    --yellow:  #F59E0B;
+    --red:     #EF4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: white;
+    font-size: 11pt;
+    line-height: 1.6;
+  }
+
+  /* ── PORTADA ── */
+  .cover {
+    height: 100vh;
+    background: linear-gradient(135deg, var(--dark) 0%, #16213E 50%, #0F3460 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 80px;
+    page-break-after: always;
+  }
+  .cover-tag {
+    color: var(--accent);
+    font-size: 10pt;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .cover h1 {
+    color: white;
+    font-size: 42pt;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .cover h1 span { color: var(--primary); }
+  .cover-sub {
+    color: #A0AEC0;
+    font-size: 14pt;
+    font-weight: 300;
+    margin-bottom: 60px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 40px;
+  }
+  .cover-meta-item { color: #A0AEC0; }
+  .cover-meta-item strong { color: white; display: block; font-size: 10pt; }
+  .cover-meta-item span { font-size: 9pt; }
+  .cover-line {
+    width: 60px;
+    height: 4px;
+    background: var(--primary);
+    margin-bottom: 32px;
+    border-radius: 2px;
+  }
+
+  /* ── LAYOUT ── */
+  .page { padding: 60px 72px; max-width: 100%; }
+  .page-break { page-break-before: always; }
+
+  /* ── HEADINGS ── */
+  h2 {
+    font-size: 20pt;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 8px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  h2 .num {
+    background: var(--primary);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12pt;
+    flex-shrink: 0;
+  }
+  h3 {
+    font-size: 13pt;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 28px 0 12px;
+  }
+  h4 {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 16px 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .section-intro {
+    color: var(--muted);
+    margin-bottom: 28px;
+    font-size: 10.5pt;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card p { color: var(--muted); font-size: 10pt; margin-top: 4px; }
+
+  /* ── FILE TREE ── */
+  .tree {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9pt;
+    background: var(--dark);
+    color: #E2E8F0;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    line-height: 1.8;
+  }
+  .tree .folder { color: var(--accent); font-weight: 500; }
+  .tree .file   { color: #CBD5E1; }
+  .tree .desc   { color: #64748B; }
+  .tree .highlight { color: #A78BFA; font-weight: 500; }
+
+  /* ── FLOW ── */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 16px 0;
+    align-items: center;
+  }
+  .flow-step {
+    background: var(--light);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 9.5pt;
+    font-weight: 500;
+    color: var(--dark);
+    text-align: center;
+    min-width: 90px;
+  }
+  .flow-step.primary { background: var(--primary); color: white; border-color: var(--primary); }
+  .flow-step.accent  { background: #E0F2FE; color: #0369A1; border-color: var(--accent); }
+  .flow-step.green   { background: #DCFCE7; color: #15803D; border-color: var(--green); }
+  .flow-step.red     { background: #FEE2E2; color: #B91C1C; border-color: var(--red); }
+  .flow-arrow { color: var(--muted); font-size: 14pt; padding: 0 8px; }
+
+  /* ── ENTITY TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin: 14px 0;
+  }
+  thead tr { background: var(--dark); }
+  thead th { color: white; padding: 10px 14px; text-align: left; font-weight: 500; }
+  tbody tr:nth-child(even) { background: var(--light); }
+  tbody td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tbody td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; color: var(--primary); font-weight: 500; }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 8pt;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .badge-get    { background: #DCFCE7; color: #15803D; }
+  .badge-post   { background: #DBEAFE; color: #1D4ED8; }
+  .badge-put    { background: #FEF3C7; color: #92400E; }
+  .badge-delete { background: #FEE2E2; color: #B91C1C; }
+  .badge-ws     { background: #EDE9FE; color: #6D28D9; }
+  .badge-public { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+  .badge-auth   { background: #FFF7ED; color: #9A3412; border: 1px solid #FED7AA; }
+
+  /* ── TWO COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 14px 0; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 14px 0; }
+
+  /* ── RELATION BOX ── */
+  .rel-box {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .rel-box-header {
+    background: var(--mid);
+    color: white;
+    padding: 8px 16px;
+    font-size: 9.5pt;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rel-box-body { padding: 14px 16px; font-size: 9pt; color: var(--muted); }
+  .rel-box-body strong { color: var(--text); }
+
+  /* ── INFO BOX ── */
+  .info-box {
+    border-left: 4px solid var(--primary);
+    background: #F5F3FF;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 9.5pt;
+    color: var(--text);
+  }
+  .warn-box {
+    border-left: 4px solid var(--yellow);
+    background: #FFFBEB;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 9.5pt;
+    color: #78350F;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { font-size: 10pt; }
+    .cover { height: 100vh; }
+    .page-break { page-break-before: always; }
+    a { color: inherit; text-decoration: none; }
+    .tree { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .flow-step.primary { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ PORTADA -->
+<div class="cover">
+  <div class="cover-tag">Documentación Técnica · v1.0</div>
+  <div class="cover-line"></div>
+  <h1>Next<span>Subastas</span></h1>
+  <div class="cover-sub">Arquitectura, estructura de carpetas y flujos del sistema</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <strong>Backend</strong>
+      <span>Spring Boot 3.2.5 · Java 21 · SQL Server</span>
+    </div>
+    <div class="cover-meta-item">
+      <strong>Frontend</strong>
+      <span>React Native · Expo SDK 56 · Axios</span>
+    </div>
+    <div class="cover-meta-item">
+      <strong>Comunicación</strong>
+      <span>REST API · WebSocket (STOMP)</span>
+    </div>
+    <div class="cover-meta-item">
+      <strong>Seguridad</strong>
+      <span>JWT · Spring Security</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ SECCIÓN 1: VISIÓN GENERAL -->
+<div class="page">
+  <h2><span class="num">1</span> Visión General del Sistema</h2>
+  <p class="section-intro">Next Subastas es una plataforma de subastas online donde los usuarios pueden registrarse, asistir a subastas en tiempo real y pujar por lotes. El sistema se divide en dos aplicaciones independientes que se comunican a través de una API REST y un canal WebSocket.</p>
+
+  <h3>Arquitectura General</h3>
+  <div class="rel-box">
+    <div class="rel-box-header">📱 Frontend (Expo) &nbsp;↔&nbsp; 🔌 API REST + WebSocket &nbsp;↔&nbsp; ⚙️ Backend (Spring Boot) &nbsp;↔&nbsp; 🗄️ SQL Server</div>
+    <div class="rel-box-body">
+      <strong>Frontend</strong> corre en el dispositivo móvil. Realiza peticiones HTTP al backend usando Axios. Se suscribe a tópicos WebSocket para recibir actualizaciones de pujas en tiempo real.<br><br>
+      <strong>Backend</strong> expone endpoints REST bajo <code>/api/**</code> y un broker STOMP en <code>/ws</code>. Procesa la lógica de negocio, persiste en SQL Server y corre un scheduler que avanza los ítems automáticamente.<br><br>
+      <strong>Base de datos</strong> SQL Server Express en el puerto 1433, base <code>NextSubastas</code>. Hibernate con <code>ddl-auto=update</code> gestiona el schema automáticamente.
+    </div>
+  </div>
+
+  <h3>Puertos y URLs Base</h3>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">⚙️ Backend</div>
+      <p><strong>Puerto:</strong> 8080<br>
+      <strong>API:</strong> http://localhost:8080/api<br>
+      <strong>WebSocket:</strong> ws://localhost:8080/ws<br>
+      <strong>Fotos:</strong> http://localhost:8080/fotos/{id}</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📱 Frontend (Expo Go)</div>
+      <p><strong>Puerto dev:</strong> 8081<br>
+      <strong>IP emulador Android:</strong> 10.0.2.2<br>
+      <strong>IP dispositivo físico:</strong> IP local de la PC<br>
+      <strong>BASE_URL:</strong> configurado en <code>services/api.js</code></p>
+    </div>
+  </div>
+
+  <h3>Categorías de Usuario</h3>
+  <p style="color:var(--muted);font-size:10pt;margin-bottom:12px;">Las categorías son acumulativas: un usuario PLATA puede ver subastas COMUN, ESPECIAL y PLATA.</p>
+  <div class="flow">
+    <div class="flow-step">COMÚN</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">ESPECIAL</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="background:#E8E8FF;color:#5B21B6;border-color:#A78BFA;">PLATA</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="background:#FEF9C3;color:#78350F;border-color:#F59E0B;">ORO</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="background:#F5F3FF;color:#6D28D9;border-color:#7C3AED;">PLATINO</div>
+  </div>
+  <div class="info-box">Para subir de categoría se requiere: haber ganado ≥ 3 ítems en la categoría actual Y tener ≥ 3 medios de pago verificados. El upgrade es automático al consultar participaciones.</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ SECCIÓN 2: ESTRUCTURA BACKEND -->
+<div class="page page-break">
+  <h2><span class="num">2</span> Estructura del Backend</h2>
+  <p class="section-intro">Aplicación Spring Boot organizada en capas. Cada capa tiene una responsabilidad única y depende solo de la capa inmediata inferior.</p>
+
+  <div class="tree">
+<span class="folder">backend/</span>
+├── <span class="folder">src/main/java/com/next/subastas/</span>
+│   ├── <span class="folder">config/</span>            <span class="desc">← Configuración y componentes de infraestructura</span>
+│   │   ├── <span class="highlight">SecurityConfig.java</span>       <span class="desc">← Spring Security + filtro JWT</span>
+│   │   ├── <span class="highlight">WebSocketConfig.java</span>      <span class="desc">← Broker STOMP para tiempo real</span>
+│   │   ├── <span class="highlight">ItemActivoScheduler.java</span>  <span class="desc">← Scheduler cada 10s, avanza ítems</span>
+│   │   └── <span class="highlight">FotoDataLoader.java</span>       <span class="desc">← Carga fotos al arrancar</span>
+│   ├── <span class="folder">controller/</span>        <span class="desc">← Reciben HTTP, delegan a services</span>
+│   │   ├── <span class="file">AuthController.java</span>        <span class="desc">← Login, registro, reseteo de contraseña</span>
+│   │   ├── <span class="file">SubastaController.java</span>     <span class="desc">← Listados, ítems, pujas</span>
+│   │   ├── <span class="file">UserController.java</span>        <span class="desc">← Actividad, medios de pago, perfil</span>
+│   │   ├── <span class="file">ConsignacionController.java</span> <span class="desc">← CRUD solicitudes de consignación</span>
+│   │   └── <span class="file">FotoController.java</span>        <span class="desc">← Servir y subir fotos</span>
+│   ├── <span class="folder">service/</span>           <span class="desc">← Toda la lógica de negocio</span>
+│   │   ├── <span class="highlight">SubastaService.java</span>       <span class="desc">← Core: pujas, métricas, cierre de ítems</span>
+│   │   ├── <span class="highlight">AuthService.java</span>          <span class="desc">← Registro, verificación, JWT</span>
+│   │   ├── <span class="highlight">EmailService.java</span>         <span class="desc">← Envío de mails (verificación, ganador, reset)</span>
+│   │   ├── <span class="file">MedioDePagoService.java</span>   <span class="desc">← Alta y validación de medios de pago</span>
+│   │   └── <span class="file">ConsignacionService.java</span>   <span class="desc">← Gestión de solicitudes de consignación</span>
+│   ├── <span class="folder">model/</span>             <span class="desc">← Entidades JPA (mapeadas a tablas SQL Server)</span>
+│   ├── <span class="folder">repository/</span>        <span class="desc">← Interfaces Spring Data JPA</span>
+│   └── <span class="folder">dto/</span>               <span class="desc">← Objetos de transferencia (request/response)</span>
+├── <span class="folder">src/main/resources/</span>
+│   ├── <span class="file">application.properties</span>    <span class="desc">← DB, puerto, JWT, mail SMTP</span>
+│   └── <span class="folder">fotos/</span>                    <span class="desc">← Fotos por productoId (cargadas al arrancar)</span>
+│       └── <span class="folder">{productoId}/</span>
+│           └── <span class="file">1.jpg, 2.jpg ...</span>
+└── <span class="file">pom.xml</span>                    <span class="desc">← Dependencias Maven</span>
+  </div>
+
+  <h3>Capa: config/</h3>
+  <div class="card">
+    <div class="card-title">🔒 SecurityConfig.java</div>
+    <p>Define qué endpoints son públicos y cuáles requieren JWT. Registra el filtro <code>JwtAuthenticationFilter</code> que intercepta cada request, extrae el token del header <code>Authorization: Bearer ...</code> y carga el usuario en el contexto de Spring Security. Las rutas <code>/api/auth/**</code> y <code>/fotos/**</code> son públicas; todo lo demás requiere autenticación.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">🔌 WebSocketConfig.java</div>
+    <p>Configura un broker STOMP en el endpoint <code>/ws</code>. Los clientes se suscriben a tópicos como <code>/topic/item/{itemId}</code> para recibir actualizaciones de pujas en tiempo real, y <code>/topic/subasta/{subastaId}</code> para saber cuándo cambia el ítem activo.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">⏱ ItemActivoScheduler.java</div>
+    <p>Se ejecuta cada 10 segundos. Para cada subasta con estado <code>abierta</code> cuya fecha/hora ya pasó: si no tiene ítem activo, activa el primero disponible. Si el ítem activo superó su <code>fechaFin</code>, llama a <code>cerrarItemActivo()</code> que determina el ganador, envía el email y avanza al siguiente ítem.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">🖼 FotoDataLoader.java</div>
+    <p>Al iniciar el backend, escanea <code>resources/fotos/{productoId}/*.jpg</code>. Si el producto existe en DB y sus fotos actuales son placeholders (≤100 bytes), las reemplaza con los archivos reales. Las carpetas deben llamarse con el ID numérico del producto.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ SECCIÓN 3: ENTIDADES -->
+<div class="page page-break">
+  <h2><span class="num">3</span> Modelo de Datos (Entidades)</h2>
+  <p class="section-intro">Todas las entidades se mapean a tablas en SQL Server. Hibernate usa <code>PhysicalNamingStrategyStandardImpl</code>, por lo que los nombres de columna coinciden exactamente con los nombres de campo en Java (camelCase).</p>
+
+  <h3>Jerarquía central de Persona</h3>
+  <div class="info-box">
+    <strong>Persona</strong> es la entidad raíz. UsuarioApp, Cliente, Subastador y Duenio son "extensiones" de Persona usando <code>@MapsId</code> — comparten el mismo ID que Persona.
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Entidad / Tabla</th><th>Descripción</th><th>Relaciones clave</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Persona / personas</td><td>Datos personales base (nombre, apellido, DNI, fotoPerfil)</td><td>Es raíz de UsuarioApp, Cliente, Subastador, Duenio</td></tr>
+      <tr><td>UsuarioApp / usuariosApp</td><td>Credenciales de login (email, password, codigoVerificacion)</td><td>@MapsId → Persona · @OneToOne → Cliente</td></tr>
+      <tr><td>Cliente / clientes</td><td>Rol comprador (categoría, estado verificación)</td><td>@MapsId → Persona · tiene MedioDePago, Asistente, SolicitudConsignacion</td></tr>
+      <tr><td>Subastador / subastadores</td><td>Matrícula y número de subastador</td><td>@MapsId → Persona · conduce Subastas</td></tr>
+      <tr><td>Duenio / duenios</td><td>Propietario de productos consignados</td><td>@MapsId → Persona · tiene Productos</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Jerarquía central de Subasta</h3>
+  <table>
+    <thead>
+      <tr><th>Entidad / Tabla</th><th>Descripción</th><th>Relaciones clave</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Subasta / subastas</td><td>Evento de subasta (fecha, hora, categoría, moneda, itemActivo, fechaFin)</td><td>@ManyToOne → Subastador · tiene Catalogos y Asistentes</td></tr>
+      <tr><td>Catalogo / catalogos</td><td>Catálogo de una subasta (descripción, responsable)</td><td>@ManyToOne → Subasta · tiene ItemsCatalogo</td></tr>
+      <tr><td>ItemCatalogo / itemsCatalogo</td><td>Lote subastable (precioBase, comision, subastado, duracionSegundos)</td><td>@ManyToOne → Catalogo · @ManyToOne → Producto</td></tr>
+      <tr><td>Producto / productos</td><td>Objeto físico (descripcionCatalogo, descripcionCompleta, revisor, duenio)</td><td>@ManyToOne → Duenio · tiene Fotos y Piezas</td></tr>
+      <tr><td>Asistente / asistentes</td><td>Registro de un cliente en una subasta (numeroPostor)</td><td>@ManyToOne → Cliente · @ManyToOne → Subasta · tiene Pujos</td></tr>
+      <tr><td>Pujo / pujos</td><td>Una puja realizada (importe, ganador, estadoPago, estadoPaquete)</td><td>@ManyToOne → Asistente · @ManyToOne → ItemCatalogo</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Entidades auxiliares</h3>
+  <table>
+    <thead>
+      <tr><th>Entidad / Tabla</th><th>Descripción</th><th>Relaciones clave</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>MedioDePago / mediosDePago</td><td>Tarjeta, cuenta bancaria o cheque. tipo: {tarjeta, cuenta, cheque}</td><td>@ManyToOne → Cliente</td></tr>
+      <tr><td>Foto / fotos</td><td>Imagen del producto almacenada como bytes en DB</td><td>@ManyToOne → Producto</td></tr>
+      <tr><td>Pieza / piezas</td><td>Componente de un producto (descripción, cantidad)</td><td>@ManyToOne → Producto</td></tr>
+      <tr><td>Seguro / seguros</td><td>Póliza de seguro para consignaciones (nroPoliza como PK)</td><td>Referenciado por SolicitudConsignacion</td></tr>
+      <tr><td>SolicitudConsignacion</td><td>Pedido de consignación de un producto al sistema</td><td>@ManyToOne → Cliente · @ManyToOne → Seguro</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Diagrama simplificado de relaciones</h3>
+  <div class="rel-box">
+    <div class="rel-box-header">Flujo principal: de la persona al pago</div>
+    <div class="rel-box-body">
+      <strong>Persona</strong> ←(1:1)→ <strong>UsuarioApp</strong> (login) &nbsp;|&nbsp; <strong>Cliente</strong> (comprador) &nbsp;|&nbsp; <strong>Subastador</strong> (conduce)<br><br>
+      <strong>Cliente</strong> ←(1:N)→ <strong>MedioDePago</strong><br>
+      <strong>Cliente</strong> ←(1:N)→ <strong>Asistente</strong> ←(N:1)→ <strong>Subasta</strong><br>
+      <strong>Asistente</strong> ←(1:N)→ <strong>Pujo</strong> ←(N:1)→ <strong>ItemCatalogo</strong><br><br>
+      <strong>Subasta</strong> ←(1:N)→ <strong>Catalogo</strong> ←(1:N)→ <strong>ItemCatalogo</strong> ←(N:1)→ <strong>Producto</strong><br>
+      <strong>Producto</strong> ←(1:N)→ <strong>Foto</strong> &nbsp;|&nbsp; <strong>Pieza</strong>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ SECCIÓN 4: API ENDPOINTS -->
+<div class="page page-break">
+  <h2><span class="num">4</span> API REST — Endpoints</h2>
+  <p class="section-intro">Todos los endpoints del backend están bajo <code>/api</code>. Los públicos no requieren token; los autenticados requieren header <code>Authorization: Bearer {JWT}</code>.</p>
+
+  <h3>Autenticación — <code>/api/auth</code></h3>
+  <table>
+    <thead><tr><th>Método</th><th>Ruta</th><th>Descripción</th><th>Acceso</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/auth/register</td><td>Inicia el registro (paso 1 de 2), envía email de verificación</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/auth/verify</td><td>Verifica el código de email</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/auth/complete-registration</td><td>Completa el registro con datos personales (paso 2)</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/auth/login</td><td>Retorna JWT si las credenciales son válidas</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/auth/forgot-password</td><td>Envía código de reseteo al email</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/auth/verify-reset-code</td><td>Valida el código antes de permitir cambio de contraseña</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/auth/reset-password</td><td>Cambia la contraseña si el código es válido</td><td><span class="badge badge-public">público</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Subastas — <code>/api/auctions</code></h3>
+  <table>
+    <thead><tr><th>Método</th><th>Ruta</th><th>Descripción</th><th>Acceso</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/auctions</td><td>Lista subastas. Sin token: todas abiertas. Con token: filtradas por categoría del usuario</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/auctions/{id}/items</td><td>Lista todos los lotes de una subasta (incluyendo vendidos)</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-put">PUT</span></td><td>/api/auctions/{id}/active-item</td><td>Establece el ítem activo (body: {itemId}). null → cierra la subasta</td><td><span class="badge badge-auth">auth</span></td></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/auctions/items</td><td>Todos los lotes activos accesibles para el usuario</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/auctions/search?q=</td><td>Búsqueda de lotes por texto</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/auctions/items/{id}</td><td>Detalle completo de un lote (precio, pujas, fotos, piezas)</td><td><span class="badge badge-public">público</span></td></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/auctions/items/{id}/bid-preview</td><td>Preview del total antes de pujar (puja + comisión + envío)</td><td><span class="badge badge-auth">auth</span></td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/auctions/items/{id}/bids</td><td>Realiza una puja. Auto-registra al usuario como asistente si no lo está</td><td><span class="badge badge-auth">auth</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Actividad del usuario — <code>/api/user/activity</code></h3>
+  <table>
+    <thead><tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/user/activity/bidding</td><td>Pujas activas del usuario (deduplica por ítem, muestra la mejor)</td></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/user/activity/won</td><td>Lotes ganados con estado de pago y envío</td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/user/activity/won/{pujaId}/pay</td><td>Registra pago de un lote ganado con el medio de pago elegido</td></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/user/activity/participaciones</td><td>Métricas completas: win rate, total ofertado, historial por subasta</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Medios de pago, perfil y consignaciones</h3>
+  <table>
+    <thead><tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/user/payment-methods</td><td>Lista los medios de pago del usuario</td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/user/payment-methods/card</td><td>Agrega tarjeta de crédito</td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/user/payment-methods/bank-account</td><td>Agrega cuenta bancaria</td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/user/payment-methods/check</td><td>Agrega cheque</td></tr>
+      <tr><td><span class="badge badge-delete">DELETE</span></td><td>/api/user/payment-methods/{id}</td><td>Elimina un medio de pago</td></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/user/profile/photo</td><td>Retorna la foto de perfil en base64</td></tr>
+      <tr><td><span class="badge badge-put">PUT</span></td><td>/api/user/profile/photo</td><td>Guarda nueva foto de perfil (base64, NVARCHAR MAX en DB)</td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>/api/user/consignaciones</td><td>Crea solicitud de consignación</td></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/user/consignaciones</td><td>Lista las solicitudes del usuario</td></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>/api/user/consignaciones/{id}</td><td>Detalle con seguro, ubicación de depósito, estado</td></tr>
+    </tbody>
+  </table>
+
+  <h3>WebSocket — Tiempo Real</h3>
+  <table>
+    <thead><tr><th>Tipo</th><th>Tópico</th><th>Payload</th><th>Cuándo se emite</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-ws">SUB</span></td><td>/topic/item/{itemId}</td><td>BidUpdateMessage (mejorPuja, pujaMin, pujaMax, tipo, ganadorClienteId)</td><td>Cada puja nueva y al cerrar el ítem</td></tr>
+      <tr><td><span class="badge badge-ws">SUB</span></td><td>/topic/subasta/{subastaId}</td><td>ActiveItemMessage (subastaId, itemActivo detallado)</td><td>Al cambiar el ítem activo</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ SECCIÓN 5: ESTRUCTURA FRONTEND -->
+<div class="page page-break">
+  <h2><span class="num">5</span> Estructura del Frontend</h2>
+  <p class="section-intro">Aplicación React Native con Expo SDK 56. Navegación Stack + Tab. Toda la comunicación con el backend pasa por <code>services/api.js</code>.</p>
+
+  <div class="tree">
+<span class="folder">frontend/src/</span>
+├── <span class="folder">navigation/</span>
+│   └── <span class="highlight">AppNavigator.js</span>       <span class="desc">← Árbol completo de navegación (Stack + Tabs)</span>
+├── <span class="folder">screens/</span>                 <span class="desc">← Una pantalla = un archivo</span>
+│   ├── <span class="file">LoginScreen.js</span>           <span class="desc">← Login + link a registro y olvido de contraseña</span>
+│   ├── <span class="file">RegisterScreen.js</span>        <span class="desc">← Formulario de registro (paso 1)</span>
+│   ├── <span class="file">CompleteRegistrationScreen.js</span> <span class="desc">← Datos personales (paso 2)</span>
+│   ├── <span class="file">ForgotPasswordScreen.js</span>  <span class="desc">← 3 pasos: email → código → nueva contraseña</span>
+│   ├── <span class="highlight">HomeScreen.js</span>            <span class="desc">← Lista de subastas, modo invitado/usuario</span>
+│   ├── <span class="file">AuctionCatalogScreen.js</span>  <span class="desc">← Ítems de una subasta específica</span>
+│   ├── <span class="file">ProductDetailScreen.js</span>   <span class="desc">← Detalle del lote, fotos, pujas en tiempo real</span>
+│   ├── <span class="file">BidConfirmationScreen.js</span> <span class="desc">← Preview y confirmación de puja</span>
+│   ├── <span class="file">SearchScreen.js</span>           <span class="desc">← Búsqueda de lotes</span>
+│   ├── <span class="highlight">ActivityScreen.js</span>        <span class="desc">← Pujas activas y ganadas, pago de lotes</span>
+│   ├── <span class="highlight">ProfileScreen.js</span>         <span class="desc">← Datos del usuario, foto de perfil, logout</span>
+│   ├── <span class="file">ParticipacionesScreen.js</span> <span class="desc">← Métricas, win rate, historial por subasta</span>
+│   ├── <span class="file">ConsignacionesScreen.js</span>  <span class="desc">← Lista de solicitudes de consignación</span>
+│   ├── <span class="file">NuevaConsignacionScreen.js</span> <span class="desc">← Formulario de nueva solicitud</span>
+│   ├── <span class="file">ConsignacionDetalleScreen.js</span> <span class="desc">← Detalle con seguro y depósito</span>
+│   └── <span class="file">PaymentMethodsScreen.js</span>  <span class="desc">← CRUD de medios de pago</span>
+├── <span class="folder">services/</span>
+│   ├── <span class="highlight">api.js</span>                   <span class="desc">← Axios + todos los endpoints organizados por dominio</span>
+│   └── <span class="highlight">AuthContext.js</span>           <span class="desc">← Estado global del usuario (React Context)</span>
+├── <span class="folder">components/</span>              <span class="desc">← Componentes reutilizables</span>
+│   └── <span class="file">index.js</span>                 <span class="desc">← NextLogo, LoadingScreen, exports</span>
+└── <span class="folder">constants/</span>
+    └── <span class="file">theme.js</span>                 <span class="desc">← COLORS, FONTS, SIZES (paleta oscura del diseño)</span>
+  </div>
+
+  <h3>Navegación (AppNavigator.js)</h3>
+  <div class="rel-box">
+    <div class="rel-box-header">Árbol de navegación</div>
+    <div class="rel-box-body">
+      <strong>RootStack</strong> (Stack Navigator)<br>
+      &nbsp;&nbsp;├── <strong>Auth</strong> → Login · Register · CompleteRegistration · ForgotPassword<br>
+      &nbsp;&nbsp;└── <strong>Main</strong> (Tab Navigator)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Tab: Home → HomeScreen<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Tab: Activity → ActivityScreen<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Tab: Profile → ProfileScreen<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Stack dentro de Main para pantallas de detalle:)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AuctionCatalog · ProductDetail · BidConfirmation · Search ·<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Participaciones · Consignaciones · NuevaConsignacion · ConsignacionDetalle · PaymentMethods
+    </div>
+  </div>
+
+  <h3>Services (api.js)</h3>
+  <p style="color:var(--muted);font-size:10pt;margin-bottom:12px;">Todas las llamadas al backend pasan por este archivo. Define un cliente Axios con interceptores y los agrupa por dominio.</p>
+  <div class="three-col">
+    <div class="card"><div class="card-title">authAPI</div><p>login, register, verify, completeRegistration, forgotPassword, verifyResetCode, resetPassword</p></div>
+    <div class="card"><div class="card-title">auctionsAPI</div><p>getAuctions, getAuctionItems, getItem, getBidPreview, placeBid, setActiveItem, search</p></div>
+    <div class="card"><div class="card-title">activityAPI</div><p>getBidding, getWon, payWon, getParticipaciones</p></div>
+    <div class="card"><div class="card-title">paymentAPI</div><p>list, addCard, addBankAccount, addCheck, remove</p></div>
+    <div class="card"><div class="card-title">profileAPI</div><p>getPhoto, updatePhoto (base64, timeout 30s)</p></div>
+    <div class="card"><div class="card-title">consignacionesAPI</div><p>crear, listar, detalle, confirmar</p></div>
+  </div>
+
+  <h3>AuthContext.js</h3>
+  <div class="card">
+    <div class="card-title">Estado global de autenticación</div>
+    <p>Provee <code>user</code>, <code>login(token)</code> y <code>logout()</code> a toda la app mediante React Context. El JWT se guarda en <code>AsyncStorage</code>. Al iniciar la app, intenta restaurar la sesión desde storage. El interceptor de Axios lee el token de <code>AsyncStorage</code> en cada request automáticamente.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ SECCIÓN 6: FLUJOS -->
+<div class="page page-break">
+  <h2><span class="num">6</span> Flujos Principales</h2>
+
+  <h3>6.1 Registro de Usuario</h3>
+  <div class="flow">
+    <div class="flow-step primary">RegisterScreen</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">POST /auth/register</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Email con código</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">POST /auth/verify</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step primary">CompleteRegistration</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">POST /auth/complete-registration</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step green">Login automático</div>
+  </div>
+  <div class="info-box">El campo <code>codigoVerificacion</code> en UsuarioApp se reutiliza para el flujo de reseteo de contraseña.</div>
+
+  <h3>6.2 Olvido de Contraseña</h3>
+  <div class="flow">
+    <div class="flow-step primary">Paso 1: Email</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">POST /forgot-password</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Mail con código</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step primary">Paso 2: Código</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">POST /verify-reset-code</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step primary">Paso 3: Nueva contraseña</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step green">POST /reset-password</div>
+  </div>
+  <div class="warn-box">El código se verifica en el backend antes de habilitar el paso 3 — si el código es incorrecto, el backend retorna 400 y el frontend bloquea el avance.</div>
+
+  <h3>6.3 Ciclo de una Subasta</h3>
+  <div class="flow">
+    <div class="flow-step">Subasta abierta en DB</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">Scheduler (10s)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step primary">setItemActivo()</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">WS: /topic/subasta/{id}</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Timer expira</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">cerrarItemActivo()</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step green">Email al ganador</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step primary">Siguiente ítem</div>
+  </div>
+  <p style="color:var(--muted);font-size:9.5pt;margin-top:8px;">Cuando no quedan ítems, el scheduler cambia el estado de la subasta a <code>cerrada</code> automáticamente.</p>
+
+  <h3>6.4 Flujo de Puja</h3>
+  <div class="flow">
+    <div class="flow-step">ProductDetailScreen</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">GET /items/{id}/bid-preview</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step primary">BidConfirmationScreen</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">POST /items/{id}/bids</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step green">WS broadcast a todos</div>
+  </div>
+  <div class="info-box">Al pujar, si el usuario no está registrado como asistente de la subasta, el backend lo registra automáticamente. Para subastas en dólares, solo se aceptan tarjeta o cuenta bancaria (no cheques).</div>
+
+  <h4>Validación de rango de puja</h4>
+  <table>
+    <thead><tr><th>Categoría de subasta</th><th>Mínimo aceptado</th><th>Máximo aceptado</th></tr></thead>
+    <tbody>
+      <tr><td>comun, especial, plata</td><td>Mejor puja actual + 1% del precio base</td><td>Mejor puja actual + 20% del precio base</td></tr>
+      <tr><td>oro, platino</td><td colspan="2">Sin restricción de rango — cualquier importe superior a la mejor puja</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.5 Pago de Lote Ganado</h3>
+  <div class="flow">
+    <div class="flow-step">ActivityScreen — tab "Ganados"</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step primary">Elegir medio de pago</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">POST /activity/won/{id}/pay</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step green">estadoPago="pagado"  estadoPaquete="empaquetado"</div>
+  </div>
+
+  <h3>6.6 Consignación</h3>
+  <div class="flow">
+    <div class="flow-step">NuevaConsignacionScreen</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step accent">POST /consignaciones</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Estado: pendiente</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step primary">Gestión interna</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step green">Seguro + depósito asignados</div>
+  </div>
+  <p style="color:var(--muted);font-size:9.5pt;margin-top:8px;">La solicitud puede incluir fotos del artículo. Cuando el administrador asigna un seguro (<code>SolicitudConsignacion.seguro → Seguro</code>), el detalle muestra número de póliza, compañía e importe.</p>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ SECCIÓN 7: REGLAS DE NEGOCIO -->
+<div class="page page-break">
+  <h2><span class="num">7</span> Reglas de Negocio Clave</h2>
+
+  <h3>Moneda de subastas</h3>
+  <div class="card">
+    <div class="card-title">💱 Subastas bimonetarias prohibidas</div>
+    <p>Cada subasta tiene una moneda fija (pesos o dólares). <strong>Las subastas en dólares solo admiten pago con tarjeta de crédito o cuenta bancaria</strong> — el cheque está bloqueado. Esta validación ocurre en <code>SubastaService.pagarPujaGanada()</code>.</p>
+  </div>
+
+  <h3>Ítems sin ofertas</h3>
+  <div class="card">
+    <div class="card-title">🏢 compradoPorEmpresa</div>
+    <p>Cuando un ítem llega al final del timer sin ninguna puja, se marca <code>subastado='si'</code> y <code>compradoPorEmpresa=true</code> — indica que la empresa lo adquiere a precio base. No se envía email de ganador.</p>
+  </div>
+
+  <h3>Estados de un ítem (subastado)</h3>
+  <div class="flow">
+    <div class="flow-step">'no' — disponible</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step primary">En subasta activa</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step green">'si' — subastado</div>
+  </div>
+
+  <h3>Preview antes de pujar</h3>
+  <table>
+    <thead><tr><th>Componente</th><th>Cálculo</th></tr></thead>
+    <tbody>
+      <tr><td>Comisión comprador</td><td>importe × 10%</td></tr>
+      <tr><td>Envío estimado</td><td>$ 75.00 fijo</td></tr>
+      <tr><td>Total a pagar</td><td>importe + comisión + envío</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Subida de categoría (automática)</h3>
+  <div class="card">
+    <div class="card-title">📈 Evaluación al consultar participaciones</div>
+    <p>Cada vez que un usuario accede a la pantalla de participaciones, el backend evalúa si puede subir de categoría. Condiciones: (1) ≥ 3 lotes ganados en la categoría actual y (2) ≥ 3 medios de pago verificados. Si se cumplen ambas, sube automáticamente y la respuesta incluye <code>subioCategoria: true</code>.</p>
+  </div>
+
+  <h3>Fotos de perfil</h3>
+  <div class="card">
+    <div class="card-title">👤 Base64 en NVARCHAR(MAX)</div>
+    <p>La foto de perfil se almacena como cadena base64 en el campo <code>Persona.fotoPerfil</code> (columna <code>NVARCHAR(MAX)</code>). Se sube con timeout extendido de 30 segundos por el tamaño. El frontend usa <code>expo-image-picker</code> con calidad 0.5 y crop 1:1.</p>
+  </div>
+
+  <h2 style="margin-top:36px;"><span class="num">8</span> Scripts SQL de Utilidad</h2>
+  <p class="section-intro">Scripts en la carpeta <code>backend/</code> para gestionar datos de prueba.</p>
+
+  <table>
+    <thead><tr><th>Archivo</th><th>Qué hace</th><th>Cuándo usar</th></tr></thead>
+    <tbody>
+      <tr><td>crear_subasta_prueba.sql</td><td>Crea una subasta COMÚN con catálogo y 3 productos de prueba. Usa SCOPE_IDENTITY() para encadenar inserts. Configurable: @fecha, @hora</td><td>Antes de una demo nueva</td></tr>
+      <tr><td>limpiar_subasta_prueba.sql</td><td>Borra en orden FK inverso: pujas → asistentes → ítems → productos → catálogo → subasta. Se ancla en la descripción 'Catálogo Prueba Parcial'</td><td>Después de la demo</td></tr>
+      <tr><td>reset_subasta_pujas.sql</td><td>Para una subasta existente re-abierta: borra pujas viejas, resetea ítems a subastado='no', limpia itemActivo y fechaFin. Requiere setear @subastaId</td><td>Al re-abrir una subasta ya usada</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn-box">
+    <strong>Columna compradoPorEmpresa:</strong> Si la tabla <code>itemsCatalogo</code> ya tiene filas, Hibernate no puede agregar esta columna NOT NULL automáticamente. Si da error, ejecutar manualmente:
+    <code style="display:block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:9pt;">ALTER TABLE itemsCatalogo ADD compradoPorEmpresa BIT NOT NULL DEFAULT 0;</code>
+  </div>
+</div>
+
+</body>
+</html>

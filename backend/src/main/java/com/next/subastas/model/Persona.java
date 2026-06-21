@@ -21,6 +21,8 @@ public class Persona {
     private String fotoDocFrente;
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String fotoDocDorso;
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String fotoPerfil;
 
     public Integer getIdentificador() { return identificador; }
     public void setIdentificador(Integer identificador) { this.identificador = identificador; }
@@ -38,4 +40,6 @@ public class Persona {
     public void setFotoDocFrente(String fotoDocFrente) { this.fotoDocFrente = fotoDocFrente; }
     public String getFotoDocDorso() { return fotoDocDorso; }
     public void setFotoDocDorso(String fotoDocDorso) { this.fotoDocDorso = fotoDocDorso; }
+    public String getFotoPerfil() { return fotoPerfil; }
+    public void setFotoPerfil(String fotoPerfil) { this.fotoPerfil = fotoPerfil; }
 }

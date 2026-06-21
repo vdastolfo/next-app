@@ -28,6 +28,10 @@ public class EmailService {
         send(to, "Completá tu registro - Next Subastas", buildCompletionHtml(nombre, code));
     }
 
+    public void sendPasswordResetCode(String to, String nombre, String code) throws Exception {
+        send(to, "Restablecer contraseña - Next Subastas", buildPasswordResetHtml(nombre, code));
+    }
+
     public void sendWinnerNotification(String to, String nombre, String lote,
                                        String producto, String importe,
                                        String comision, String envio, String total) throws Exception {
@@ -93,6 +97,20 @@ public class EmailService {
               <p style="color:#888;font-size:13px;margin-top:24px;">Si no realizaste esta solicitud, podés ignorar este correo.</p>
             </div>
             """.formatted(nombre);
+    }
+
+    private String buildPasswordResetHtml(String nombre, String code) {
+        return """
+            <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#1a1a2e;border-radius:12px;">
+              <h1 style="color:#e8b86d;font-size:24px;margin-bottom:8px;">Next Subastas</h1>
+              <p style="color:#ccc;font-size:18px;margin-bottom:16px;">Hola, %s</p>
+              <p style="color:#ccc;font-size:15px;margin-bottom:24px;">Recibimos una solicitud para restablecer tu contraseña. Usá este código:</p>
+              <div style="background:#16213e;border-radius:8px;padding:24px;text-align:center;letter-spacing:12px;">
+                <span style="color:#e8b86d;font-size:40px;font-weight:bold;">%s</span>
+              </div>
+              <p style="color:#888;font-size:13px;margin-top:24px;">El código expira en 15 minutos. Si no solicitaste este cambio, ignorá este correo.</p>
+            </div>
+            """.formatted(nombre, code);
     }
 
     private String buildCompletionHtml(String nombre, String code) {

@@ -79,10 +79,10 @@ export default function ActivityScreen({ navigation }) {
   const handleSelectMethod = (puja, method) => {
     const esDolares = puja.moneda === 'dolares';
 
-    if (esDolares && method.tipo !== 'tarjeta') {
+    if (esDolares && method.tipo === 'cheque') {
       Alert.alert(
         'Método no compatible',
-        'No cuenta con fondos de dólares. Elija otra cuenta bancaria o una tarjeta de crédito.',
+        'Esta subasta es en dólares. Solo podés abonarla con tarjeta de crédito o cuenta bancaria.',
         [{ text: 'Entendido' }]
       );
       return;
@@ -103,10 +103,10 @@ export default function ActivityScreen({ navigation }) {
       }
     };
 
-    if (esDolares && method.tipo === 'tarjeta') {
+    if (esDolares) {
       Alert.alert(
         'Cobro en dólares',
-        'Se cobrará el monto en dólares según el tipo de cambio aplicable.',
+        'Esta subasta se abona en dólares. El monto se debitará en USD según el medio seleccionado.',
         [
           { text: 'Cancelar', style: 'cancel' },
           { text: 'Confirmar', onPress: confirmar },
@@ -132,12 +132,10 @@ export default function ActivityScreen({ navigation }) {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <NextLogo size={36} showText={true} />
-        <TouchableOpacity><Text style={styles.headerIcon}>🔔</Text></TouchableOpacity>
       </View>
 
       <View style={styles.pageTitleRow}>
         <Text style={styles.pageTitle}>Actividad</Text>
-        <TouchableOpacity><Text style={styles.filterIcon}>⚙</Text></TouchableOpacity>
       </View>
 
       <View style={styles.tabRow}>
@@ -211,27 +209,47 @@ export default function ActivityScreen({ navigation }) {
           {loadingMethods ? (
             <ActivityIndicator color={COLORS.secondary} style={{ marginVertical: SIZES.xl }} />
           ) : (
-            payMethods.map(method => (
-              <TouchableOpacity
-                key={method.id}
-                style={styles.payMethodRow}
-                onPress={() => handleSelectMethod(payModal, method)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.payMethodIcon}>
-                  <Text style={styles.payMethodIconText}>
-                    {method.tipo === 'tarjeta' ? '💳' : method.tipo === 'cuenta' ? '🏦' : '📄'}
+            <>
+              {payModal?.moneda === 'dolares' && (
+                <View style={styles.dolaresAviso}>
+                  <Text style={styles.dolaresAvisoText}>
+                    Subasta en dólares · Solo tarjeta o cuenta bancaria
                   </Text>
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.payMethodDisplay}>{method.display}</Text>
-                  <Text style={styles.payMethodTipo}>
-                    {method.tipo === 'tarjeta' ? 'Tarjeta de crédito' : method.tipo === 'cuenta' ? 'Cuenta bancaria' : 'Cheque certificado'}
-                  </Text>
-                </View>
-                <Text style={styles.payMethodArrow}>›</Text>
-              </TouchableOpacity>
-            ))
+              )}
+              {payMethods.map(method => {
+                const incompatible = payModal?.moneda === 'dolares' && method.tipo === 'cheque';
+                return (
+                  <TouchableOpacity
+                    key={method.id}
+                    style={[styles.payMethodRow, incompatible && styles.payMethodRowDisabled]}
+                    onPress={() => handleSelectMethod(payModal, method)}
+                    activeOpacity={incompatible ? 1 : 0.8}
+                  >
+                    <View style={styles.payMethodIcon}>
+                      <Text style={styles.payMethodIconText}>
+                        {method.tipo === 'tarjeta' ? '💳' : method.tipo === 'cuenta' ? '🏦' : '📄'}
+                      </Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.payMethodDisplay, incompatible && styles.payMethodTextDisabled]}>
+                        {method.display}
+                      </Text>
+                      <Text style={styles.payMethodTipo}>
+                        {method.tipo === 'tarjeta' ? 'Tarjeta de crédito'
+                          : method.tipo === 'cuenta' ? 'Cuenta bancaria'
+                          : 'Cheque certificado'}
+                        {incompatible ? ' · No disponible para dólares' : ''}
+                      </Text>
+                    </View>
+                    {incompatible
+                      ? <Text style={styles.payMethodLock}>🔒</Text>
+                      : <Text style={styles.payMethodArrow}>›</Text>
+                    }
+                  </TouchableOpacity>
+                );
+              })}
+            </>
           )}
 
           <TouchableOpacity style={styles.payCancelBtn} onPress={() => setPayModal(null)}>
@@ -421,6 +439,15 @@ const styles = StyleSheet.create({
   payMethodArrow: { color: COLORS.textMuted, fontSize: 24 },
   payCancelBtn: { marginTop: SIZES.sm, paddingVertical: SIZES.md, alignItems: 'center' },
   payCancelText: { color: COLORS.textMuted, fontFamily: FONTS.bodyMedium, fontSize: SIZES.textMd },
+  dolaresAviso: {
+    backgroundColor: 'rgba(232,184,109,0.12)', borderRadius: SIZES.radiusSm,
+    paddingHorizontal: SIZES.md, paddingVertical: SIZES.xs + 2, marginBottom: SIZES.sm,
+    borderLeftWidth: 3, borderLeftColor: COLORS.warning,
+  },
+  dolaresAvisoText: { color: COLORS.warning, fontFamily: FONTS.bodySemiBold, fontSize: SIZES.textXs },
+  payMethodRowDisabled: { opacity: 0.4 },
+  payMethodTextDisabled: { color: COLORS.textMuted },
+  payMethodLock: { fontSize: 16, color: COLORS.textMuted },
 
   toastOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: SIZES.lg },
   toastCard: { backgroundColor: COLORS.card, borderRadius: SIZES.radiusLg, padding: SIZES.lg, borderTopWidth: 4, borderTopColor: COLORS.secondary },

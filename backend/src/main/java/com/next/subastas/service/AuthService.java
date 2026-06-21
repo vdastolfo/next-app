@@ -201,6 +201,62 @@ public class AuthService {
     }
 
     @Transactional
+    public void forgotPassword(String email) {
+        UsuarioApp usuario = usuarioAppRepository.findByEmail(email)
+                .orElseThrow(() -> new BadCredentialsException("No existe una cuenta con ese email"));
+
+        if (!"si".equals(usuario.getActivo())) {
+            throw new BadCredentialsException("La cuenta no está activa");
+        }
+
+        String codigo = String.format("%06d", new Random().nextInt(999999));
+        usuario.setCodigoVerificacion(codigo);
+        usuario.setCodigoExpiracion(LocalDateTime.now().plusMinutes(15));
+        usuarioAppRepository.save(usuario);
+
+        String nombre = usuario.getCliente().getPersona().getNombre();
+        try {
+            emailService.sendPasswordResetCode(email, nombre, codigo);
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo enviar el email: " + e.getMessage());
+        }
+    }
+
+    public void verifyResetCode(String email, String codigo) {
+        UsuarioApp usuario = usuarioAppRepository.findByEmail(email)
+                .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));
+
+        if (usuario.getCodigoVerificacion() == null
+                || !usuario.getCodigoVerificacion().equals(codigo)) {
+            throw new BadCredentialsException("Código incorrecto");
+        }
+
+        if (LocalDateTime.now().isAfter(usuario.getCodigoExpiracion())) {
+            throw new BadCredentialsException("El código expiró. Solicitá uno nuevo.");
+        }
+    }
+
+    @Transactional
+    public void resetPassword(String email, String codigo, String nuevaPassword) {
+        UsuarioApp usuario = usuarioAppRepository.findByEmail(email)
+                .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));
+
+        if (usuario.getCodigoVerificacion() == null
+                || !usuario.getCodigoVerificacion().equals(codigo)) {
+            throw new BadCredentialsException("Código incorrecto");
+        }
+
+        if (LocalDateTime.now().isAfter(usuario.getCodigoExpiracion())) {
+            throw new BadCredentialsException("El código expiró. Solicitá uno nuevo.");
+        }
+
+        usuario.setPasswordHash(passwordEncoder.encode(nuevaPassword));
+        usuario.setCodigoVerificacion(null);
+        usuario.setCodigoExpiracion(null);
+        usuarioAppRepository.save(usuario);
+    }
+
+    @Transactional
     public void resendCode(String email) {
         UsuarioApp usuario = usuarioAppRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));

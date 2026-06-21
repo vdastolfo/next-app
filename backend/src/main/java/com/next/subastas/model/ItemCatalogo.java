@@ -20,6 +20,8 @@ public class ItemCatalogo {
     @Column(length = 2)
     private String subastado = "no";
     private Integer duracionSegundos = 120;
+    @Column(nullable = false)
+    private boolean compradoPorEmpresa = false;
 
     public Integer getIdentificador() { return identificador; }
     public void setIdentificador(Integer identificador) { this.identificador = identificador; }
@@ -35,4 +37,6 @@ public class ItemCatalogo {
     public void setSubastado(String subastado) { this.subastado = subastado; }
     public Integer getDuracionSegundos() { return duracionSegundos != null ? duracionSegundos : 120; }
     public void setDuracionSegundos(Integer duracionSegundos) { this.duracionSegundos = duracionSegundos; }
+    public boolean isCompradoPorEmpresa() { return compradoPorEmpresa; }
+    public void setCompradoPorEmpresa(boolean compradoPorEmpresa) { this.compradoPorEmpresa = compradoPorEmpresa; }
 }
