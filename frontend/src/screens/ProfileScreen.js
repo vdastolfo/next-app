@@ -64,6 +64,28 @@ export default function ProfileScreen({ navigation }) {
     plata: '#B0BEC5', oro: '#FFD740', platino: '#E040FB',
   };
 
+  if (!user) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <NextLogo size={36} showText={true} />
+        </View>
+        <View style={guestStyles.container}>
+          <Text style={guestStyles.icon}>👤</Text>
+          <Text style={guestStyles.title}>Modo invitado</Text>
+          <Text style={guestStyles.sub}>Iniciá sesión para acceder a tu perfil, pujas y medios de pago.</Text>
+          <TouchableOpacity
+            style={guestStyles.btn}
+            onPress={() => navigation.navigate('Login')}
+            activeOpacity={0.85}
+          >
+            <Text style={guestStyles.btnText}>Iniciar sesión</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
@@ -158,6 +180,15 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: SIZES.lg, paddingVertical: SIZES.md },
   headerIcon: { fontSize: 22 },
+});
+
+const guestStyles = StyleSheet.create({
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: SIZES.xl, marginTop: 80 },
+  icon: { fontSize: 56, marginBottom: SIZES.lg },
+  title: { color: COLORS.textPrimary, fontFamily: FONTS.titleBold, fontSize: SIZES.textXxl, marginBottom: SIZES.sm },
+  sub: { color: COLORS.textMuted, fontFamily: FONTS.bodyRegular, fontSize: SIZES.textMd, textAlign: 'center', marginBottom: SIZES.xl },
+  btn: { backgroundColor: COLORS.primary, borderRadius: SIZES.radiusFull, paddingHorizontal: SIZES.xl, paddingVertical: SIZES.md + 2, width: '100%', alignItems: 'center' },
+  btnText: { color: 'white', fontFamily: FONTS.bodySemiBold, fontSize: SIZES.textMd },
 });
 
 const profileStyles = StyleSheet.create({

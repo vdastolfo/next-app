@@ -6,8 +6,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
+import { useAuth } from '../services/AuthContext';
 
 export default function SearchScreen({ navigation, route }) {
+  const { user } = useAuth();
   const [query, setQuery] = useState(route.params?.query || '');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -113,7 +115,10 @@ export default function SearchScreen({ navigation, route }) {
                     </View>
                   </View>
                   <Text style={searchStyles.popularName}>{item.nombreProducto}</Text>
-                  <Text style={searchStyles.popularPrice}>${item.mejorPujaActual.toLocaleString()}</Text>
+                  {user
+                    ? <Text style={searchStyles.popularPrice}>${item.mejorPujaActual.toLocaleString()}</Text>
+                    : <Text style={searchStyles.guestPrice}>Iniciá sesión para ver el precio</Text>
+                  }
                 </TouchableOpacity>
               ))}
             </View>
@@ -131,9 +136,10 @@ export default function SearchScreen({ navigation, route }) {
             </View>
             <View style={searchStyles.resultInfo}>
               <Text style={searchStyles.resultName}>{item.nombreProducto}</Text>
-              <Text style={searchStyles.resultPrice}>
-                ${item.mejorPujaActual?.toLocaleString() || item.precioBase?.toLocaleString()}
-              </Text>
+              {user
+                ? <Text style={searchStyles.resultPrice}>${item.mejorPujaActual?.toLocaleString() || item.precioBase?.toLocaleString()}</Text>
+                : <Text style={searchStyles.guestPrice}>Iniciá sesión para ver el precio</Text>
+              }
             </View>
           </TouchableOpacity>
         ))}
@@ -235,6 +241,7 @@ const searchStyles = StyleSheet.create({
   resultInfo: { flex: 1, padding: SIZES.md, justifyContent: 'center' },
   resultName: { color: COLORS.textPrimary, fontFamily: FONTS.titleBold, fontSize: SIZES.textMd, marginBottom: 4 },
   resultPrice: { color: COLORS.secondary, fontFamily: FONTS.titleBold, fontSize: SIZES.textLg },
+  guestPrice: { color: COLORS.textMuted, fontFamily: FONTS.bodyRegular, fontSize: SIZES.textXs, fontStyle: 'italic' },
 });
 
 const filterStyles = StyleSheet.create({
