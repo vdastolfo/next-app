@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, KeyboardAvoidingView, Platform,
+  TouchableOpacity, KeyboardAvoidingView, Platform, Image,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { Input, PrimaryButton, NextLogo } from '../components';
 import { authAPI } from '../services/api';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
@@ -11,52 +12,70 @@ export default function RegisterScreen({ navigation }) {
 
   const [form, setForm] = useState({
     nombre: '',
+    apellido: '',
     documento: '',
     email: '',
-    password: '',
-    confirmPassword: '',
+    domicilio: '',
+    pais: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [fotoFrente, setFotoFrente] = useState(null);
+  const [fotoDorso, setFotoDorso] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   const setField = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
     if (errors[field]) setErrors((e) => ({ ...e, [field]: null }));
   };
 
-  // ── Validaciones ──────────────────────────────────────────────────────────
+  const pickImage = async (side) => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      setErrors((e) => ({ ...e, general: 'Se necesita permiso para acceder a la galería.' }));
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.6,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets?.[0]) {
+      const asset = result.assets[0];
+      const base64 = `data:image/jpeg;base64,${asset.base64}`;
+      if (side === 'frente') {
+        setFotoFrente(base64);
+        if (errors.fotoFrente) setErrors((e) => ({ ...e, fotoFrente: null }));
+      } else {
+        setFotoDorso(base64);
+        if (errors.fotoDorso) setErrors((e) => ({ ...e, fotoDorso: null }));
+      }
+    }
+  };
+
   const validate = () => {
     const e = {};
 
-    if (!form.nombre.trim())
-      e.nombre = 'El nombre es obligatorio';
-
-    if (!form.documento.trim())
-      e.documento = 'El documento es obligatorio';
+    if (!form.nombre.trim()) e.nombre = 'El nombre es obligatorio';
+    if (!form.apellido.trim()) e.apellido = 'El apellido es obligatorio';
+    if (!form.documento.trim()) e.documento = 'El documento es obligatorio';
 
     if (!form.email.trim())
       e.email = 'El correo electrónico es obligatorio';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       e.email = 'El formato del correo no es válido';
 
-    if (!form.password)
-      e.password = 'La contraseña es obligatoria';
-    else if (form.password.length < 6)
-      e.password = 'La contraseña debe tener al menos 6 caracteres';
-
-    if (!form.confirmPassword)
-      e.confirmPassword = 'Confirmá tu contraseña';
-    else if (form.password !== form.confirmPassword)
-      e.confirmPassword = 'Las contraseñas no coinciden';
+    if (!form.domicilio.trim()) e.domicilio = 'El domicilio legal es obligatorio';
+    if (!form.pais.trim()) e.pais = 'El país de origen es obligatorio';
+    if (!fotoFrente) e.fotoFrente = 'La foto del frente del documento es obligatoria';
+    if (!fotoDorso) e.fotoDorso = 'La foto del dorso del documento es obligatoria';
 
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  // ── Submit ────────────────────────────────────────────────────────────────
   const handleRegister = async () => {
     if (!validate()) return;
 
@@ -66,17 +85,21 @@ export default function RegisterScreen({ navigation }) {
     try {
       await authAPI.register({
         nombre: form.nombre.trim(),
+        apellido: form.apellido.trim(),
         documento: form.documento.trim(),
         email: form.email.trim().toLowerCase(),
-        password: form.password,
+        domicilio: form.domicilio.trim(),
+        pais: form.pais.trim(),
+        fotoDocFrente: fotoFrente,
+        fotoDocDorso: fotoDorso,
       });
 
-      navigation.navigate('Verify', { email: form.email.trim().toLowerCase() });
+      navigation.navigate('RegistrationPending');
     } catch (error) {
       if (error.isNetworkError) {
         setErrors({ general: 'Sin conexión a internet. Verificá tu red.' });
       } else if (error.response?.status === 409) {
-        setErrors({ email: 'Ya existe una cuenta con ese correo.' });
+        setErrors({ email: 'Ya existe una solicitud con ese correo.' });
       } else if (error.response?.status === 400) {
         setErrors({ general: 'Datos inválidos. Revisá el formulario.' });
       } else {
@@ -87,7 +110,6 @@ export default function RegisterScreen({ navigation }) {
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -104,29 +126,45 @@ export default function RegisterScreen({ navigation }) {
             <Text style={styles.backText}>← Volver</Text>
           </TouchableOpacity>
           <NextLogo size={70} showText={true} />
-          <Text style={styles.title}>Crear cuenta</Text>
-          <Text style={styles.subtitle}>Completá tus datos para registrarte</Text>
+          <Text style={styles.title}>Solicitar registro</Text>
+          <Text style={styles.subtitle}>
+            Completá tus datos para iniciar el proceso de registro. Nuestro equipo los verificará antes de habilitarte.
+          </Text>
         </View>
 
         {/* Formulario */}
         <View style={styles.form}>
-          <Input
-            label="NOMBRE COMPLETO"
-            placeholder="Juan Pérez"
-            value={form.nombre}
-            onChangeText={(t) => setField('nombre', t)}
-            error={errors.nombre}
-            rightIcon={<Text style={styles.iconText}>👤</Text>}
-          />
+
+          {/* Nombre y Apellido en fila */}
+          <View style={styles.row}>
+            <View style={styles.halfField}>
+              <Input
+                label="NOMBRE"
+                placeholder="Juan"
+                value={form.nombre}
+                onChangeText={(t) => setField('nombre', t)}
+                error={errors.nombre}
+                autoCapitalize="words"
+              />
+            </View>
+            <View style={styles.halfField}>
+              <Input
+                label="APELLIDO"
+                placeholder="Pérez"
+                value={form.apellido}
+                onChangeText={(t) => setField('apellido', t)}
+                error={errors.apellido}
+                autoCapitalize="words"
+              />
+            </View>
+          </View>
 
           <Input
             label="DOCUMENTO (DNI / PASAPORTE)"
             placeholder="12345678"
             value={form.documento}
             onChangeText={(t) => setField('documento', t)}
-            keyboardType="default"
             error={errors.documento}
-            rightIcon={<Text style={styles.iconText}>🪪</Text>}
           />
 
           <Input
@@ -141,28 +179,66 @@ export default function RegisterScreen({ navigation }) {
           />
 
           <Input
-            label="CONTRASEÑA"
-            placeholder="Mínimo 6 caracteres"
-            value={form.password}
-            onChangeText={(t) => setField('password', t)}
-            secureTextEntry={!showPassword}
-            error={errors.password}
-            rightIcon={<Text style={styles.iconText}>{showPassword ? '👁' : '🔒'}</Text>}
-            onRightIconPress={() => setShowPassword(!showPassword)}
+            label="DOMICILIO LEGAL"
+            placeholder="Av. Corrientes 1234, CABA"
+            value={form.domicilio}
+            onChangeText={(t) => setField('domicilio', t)}
+            error={errors.domicilio}
+            autoCapitalize="words"
           />
 
           <Input
-            label="CONFIRMAR CONTRASEÑA"
-            placeholder="Repetí tu contraseña"
-            value={form.confirmPassword}
-            onChangeText={(t) => setField('confirmPassword', t)}
-            secureTextEntry={!showConfirm}
-            error={errors.confirmPassword}
-            rightIcon={<Text style={styles.iconText}>{showConfirm ? '👁' : '🔒'}</Text>}
-            onRightIconPress={() => setShowConfirm(!showConfirm)}
+            label="PAÍS DE ORIGEN"
+            placeholder="Argentina"
+            value={form.pais}
+            onChangeText={(t) => setField('pais', t)}
+            error={errors.pais}
+            autoCapitalize="words"
           />
 
-          {/* Error general */}
+          {/* Fotos del documento */}
+          <Text style={styles.sectionLabel}>FOTO DEL DOCUMENTO</Text>
+
+          <View style={styles.photoRow}>
+            <View style={styles.photoSlot}>
+              <TouchableOpacity
+                style={[styles.photoBtn, errors.fotoFrente && styles.photoBtnError]}
+                onPress={() => pickImage('frente')}
+              >
+                {fotoFrente ? (
+                  <Image source={{ uri: fotoFrente }} style={styles.photoPreview} />
+                ) : (
+                  <View style={styles.photoPlaceholder}>
+                    <Text style={styles.photoIcon}>📄</Text>
+                    <Text style={styles.photoLabel}>FRENTE</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              {errors.fotoFrente && (
+                <Text style={styles.photoError}>{errors.fotoFrente}</Text>
+              )}
+            </View>
+
+            <View style={styles.photoSlot}>
+              <TouchableOpacity
+                style={[styles.photoBtn, errors.fotoDorso && styles.photoBtnError]}
+                onPress={() => pickImage('dorso')}
+              >
+                {fotoDorso ? (
+                  <Image source={{ uri: fotoDorso }} style={styles.photoPreview} />
+                ) : (
+                  <View style={styles.photoPlaceholder}>
+                    <Text style={styles.photoIcon}>📄</Text>
+                    <Text style={styles.photoLabel}>DORSO</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              {errors.fotoDorso && (
+                <Text style={styles.photoError}>{errors.fotoDorso}</Text>
+              )}
+            </View>
+          </View>
+
           {errors.general && (
             <View style={styles.errorBanner}>
               <Text style={styles.errorBannerText}>⚠ {errors.general}</Text>
@@ -170,14 +246,13 @@ export default function RegisterScreen({ navigation }) {
           )}
 
           <PrimaryButton
-            title="Crear cuenta"
+            title="Enviar solicitud"
             onPress={handleRegister}
             loading={loading}
             style={styles.submitBtn}
           />
         </View>
 
-        {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
             ¿Ya tenés cuenta?{' '}
@@ -227,13 +302,76 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bodyRegular,
     fontSize: SIZES.textSm,
     marginTop: SIZES.xs,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   form: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: SIZES.sm,
+  },
+  halfField: {
     flex: 1,
   },
   iconText: {
     color: COLORS.textMuted,
     fontSize: 18,
+  },
+  sectionLabel: {
+    color: COLORS.textSecondary,
+    fontFamily: FONTS.bodySemiBold,
+    fontSize: SIZES.textXs,
+    letterSpacing: 1.5,
+    marginBottom: SIZES.sm,
+    marginTop: SIZES.xs,
+  },
+  photoRow: {
+    flexDirection: 'row',
+    gap: SIZES.md,
+    marginBottom: SIZES.md,
+  },
+  photoSlot: {
+    flex: 1,
+  },
+  photoBtn: {
+    height: 120,
+    borderRadius: SIZES.radiusMd,
+    borderWidth: 1.5,
+    borderColor: COLORS.cardAlt,
+    borderStyle: 'dashed',
+    backgroundColor: COLORS.card,
+    overflow: 'hidden',
+  },
+  photoBtnError: {
+    borderColor: COLORS.error,
+  },
+  photoPlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  photoIcon: {
+    fontSize: 28,
+  },
+  photoLabel: {
+    color: COLORS.textMuted,
+    fontFamily: FONTS.bodySemiBold,
+    fontSize: SIZES.textXs,
+    letterSpacing: 1.5,
+  },
+  photoPreview: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  photoError: {
+    color: COLORS.error,
+    fontFamily: FONTS.bodyRegular,
+    fontSize: SIZES.textXs,
+    marginTop: 4,
   },
   errorBanner: {
     backgroundColor: 'rgba(255,82,82,0.15)',

@@ -6,26 +6,28 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../services/AuthContext';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import RegisterScreen from '../screens/RegisterScreen';
+import RegistrationPendingScreen from '../screens/RegistrationPendingScreen';
+import CompleteRegistrationScreen from '../screens/CompleteRegistrationScreen';
+import FirstPaymentScreen from '../screens/FirstPaymentScreen';
 import VerificationScreen from '../screens/VerificationScreen';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
-import {
-  ActivityScreen,
-  ProfileScreen,
-  PaymentMethodsScreen,
-  SearchScreen,
-} from '../screens/OtherScreens';
+import ActivityScreen from '../screens/ActivityScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import PaymentMethodsScreen from '../screens/PaymentMethodsScreen';
+import SearchScreen from '../screens/SearchScreen';
+import AuctionCatalogScreen from '../screens/AuctionCatalogScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// ── Stack del Home (Home → Detalle → etc) ────────────────────────────────────
+// ── Stack del Home (Home → Catálogo de subasta → Búsqueda) ───────────────────
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HomeMain" component={HomeScreen} />
-      <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+      <Stack.Screen name="AuctionCatalog" component={AuctionCatalogScreen} />
       <Stack.Screen name="Search" component={SearchScreen} />
     </Stack.Navigator>
   );
@@ -111,7 +113,7 @@ function MainTabs() {
   );
 }
 
-// ── Navegador raíz: decide si mostrar Login o la app ─────────────────────────
+// ── Navegador raíz ────────────────────────────────────────────────────────────
 export default function AppNavigator() {
   const { user } = useAuth();
 
@@ -119,8 +121,12 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Main" component={MainTabs} />
+        <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="RegistrationPending" component={RegistrationPendingScreen} />
+        <Stack.Screen name="CompleteRegistration" component={CompleteRegistrationScreen} />
+        <Stack.Screen name="FirstPayment" component={FirstPaymentScreen} />
         <Stack.Screen name="Verify" component={VerificationScreen} />
       </Stack.Navigator>
     </NavigationContainer>

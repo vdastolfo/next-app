@@ -1,6 +1,7 @@
 package com.next.subastas.model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "productos")
@@ -23,6 +24,12 @@ public class Producto {
     @Column(length = 30)
     private String seguro;
 
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Foto> fotos;
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Pieza> piezas;
+
     public Integer getIdentificador() { return identificador; }
     public void setIdentificador(Integer identificador) { this.identificador = identificador; }
     public LocalDate getFecha() { return fecha; }
@@ -39,4 +46,10 @@ public class Producto {
     public void setDuenio(Duenio duenio) { this.duenio = duenio; }
     public String getSeguro() { return seguro; }
     public void setSeguro(String seguro) { this.seguro = seguro; }
+
+    public List<Foto> getFotos() { return fotos; }
+    public void setFotos(List<Foto> fotos) { this.fotos = fotos; }
+
+    public List<Pieza> getPiezas() { return piezas; }
+    public void setPiezas(List<Pieza> piezas) { this.piezas = piezas; }
 }

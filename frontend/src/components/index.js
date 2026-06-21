@@ -1,8 +1,9 @@
 import React from 'react';
 import {
   TouchableOpacity, Text, StyleSheet, View,
-  ActivityIndicator, TextInput
+  ActivityIndicator, TextInput, Image
 } from 'react-native';
+import { MEDIA_URL } from '../services/api';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import Svg, { Path } from 'react-native-svg';
@@ -107,39 +108,76 @@ export function Input({
 }
 
 // ── TARJETA DE SUBASTA (Home) ─────────────────────────────────────────────────
-export function AuctionCard({ item, onBid, onPress }) {
-  const [timeLeft, setTimeLeft] = React.useState('--:--:--');
+export function AuctionCard({ item, onBid, onPress, isGuest = false, style }) {
+  const [imgError, setImgError] = React.useState(false);
+
+  const fotoId = item.fotoIds?.[0];
+  const showImage = fotoId && !imgError;
+  const isSold = item.subastado === 'si';
 
   return (
     <TouchableOpacity
-      style={styles.auctionCard}
+      style={[styles.auctionCard, style, isSold && styles.auctionCardSold]}
       onPress={onPress}
       activeOpacity={0.9}
     >
       <View style={styles.auctionImageContainer}>
-        <View style={styles.auctionImagePlaceholder}>
-          <Text style={styles.auctionImagePlaceholderText}>📦</Text>
-        </View>
-        <View style={styles.timerBadge}>
-          <Text style={styles.timerText}>⏱ {timeLeft}</Text>
-        </View>
+        {showImage ? (
+          <Image
+            source={{ uri: `${MEDIA_URL}/fotos/${fotoId}` }}
+            style={styles.auctionImage}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <View style={styles.auctionImagePlaceholder}>
+            <Text style={styles.auctionImagePlaceholderText}>📦</Text>
+          </View>
+        )}
+        {isSold && (
+          <View style={styles.soldOverlay}>
+            <Text style={styles.soldOverlayText}>VENDIDO</Text>
+          </View>
+        )}
       </View>
       <View style={styles.auctionCardBottom}>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.auctionTitle} numberOfLines={1}>
             {item.nombreProducto || 'Ítem sin nombre'}
           </Text>
-          <Text style={styles.auctionLabel}>OFERTA ACTUAL</Text>
-          <Text style={styles.auctionPrice}>
-            ${item.mejorPujaActual?.toLocaleString() || item.precioBase?.toLocaleString() || '0'}
-          </Text>
+          {isGuest ? (
+            <Text style={styles.guestPrice}>Iniciá sesión para ver precios</Text>
+          ) : isSold ? (
+            <>
+              <Text style={styles.auctionLabel}>PRECIO FINAL</Text>
+              <Text style={[styles.auctionPrice, { color: COLORS.textMuted }]}>
+                ${item.mejorPujaActual?.toLocaleString() || '—'}
+              </Text>
+              {item.duenioActual && (
+                <Text style={styles.soldOwner} numberOfLines={1}>
+                  Adjudicado a {item.duenioActual}
+                </Text>
+              )}
+            </>
+          ) : (
+            <>
+              <Text style={styles.auctionLabel}>OFERTA ACTUAL</Text>
+              <Text style={styles.auctionPrice}>
+                ${item.mejorPujaActual?.toLocaleString() || item.precioBase?.toLocaleString() || '0'}
+              </Text>
+            </>
+          )}
         </View>
-        <TouchableOpacity
-          style={styles.bidButton}
-          onPress={() => onBid && onBid(item)}
-        >
-          <Text style={styles.bidButtonText}>PUJAR</Text>
-        </TouchableOpacity>
+        {!isSold && !isGuest && (
+          <TouchableOpacity
+            style={styles.bidButton}
+            onPress={() => onBid && onBid(item)}
+          >
+            <Text style={styles.bidButtonText}>PUJAR</Text>
+          </TouchableOpacity>
+        )}
+        {isSold && (
+          <Text style={styles.soldArrow}>›</Text>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -269,7 +307,14 @@ const styles = StyleSheet.create({
     marginRight: SIZES.md,
     width: 280,
   },
+  auctionCardSold: {
+    opacity: 0.85,
+  },
   auctionImageContainer: { position: 'relative' },
+  auctionImage: {
+    height: 180,
+    width: '100%',
+  },
   auctionImagePlaceholder: {
     height: 180,
     backgroundColor: COLORS.cardAlt,
@@ -277,19 +322,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   auctionImagePlaceholderText: { fontSize: 48 },
-  timerBadge: {
+  soldOverlay: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    borderRadius: SIZES.radiusFull,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  timerText: {
-    color: COLORS.error,
-    fontFamily: FONTS.bodyMedium,
-    fontSize: SIZES.textSm,
+  soldOverlayText: {
+    color: COLORS.textPrimary,
+    fontFamily: FONTS.titleBold,
+    fontSize: SIZES.textXl,
+    letterSpacing: 3,
+    borderWidth: 2,
+    borderColor: COLORS.textPrimary,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: SIZES.radiusSm,
   },
   auctionCardBottom: {
     padding: SIZES.md,
@@ -309,10 +358,29 @@ const styles = StyleSheet.create({
     fontSize: SIZES.textXs,
     letterSpacing: 1,
   },
+  guestPrice: {
+    color: COLORS.textMuted,
+    fontFamily: FONTS.bodyRegular,
+    fontSize: SIZES.textXs,
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
   auctionPrice: {
     color: COLORS.secondary,
     fontFamily: FONTS.titleBold,
     fontSize: SIZES.textXl,
+  },
+  soldOwner: {
+    color: COLORS.textMuted,
+    fontFamily: FONTS.bodyRegular,
+    fontSize: SIZES.textXs,
+    marginTop: 2,
+    fontStyle: 'italic',
+  },
+  soldArrow: {
+    color: COLORS.textMuted,
+    fontSize: 24,
+    marginLeft: SIZES.sm,
   },
   bidButton: {
     backgroundColor: COLORS.secondary,

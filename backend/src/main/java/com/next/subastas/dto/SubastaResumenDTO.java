@@ -11,6 +11,10 @@ public class SubastaResumenDTO {
     private LocalTime hora;
     private String ubicacion;
     private Integer totalItems;
+    private String rematadorNombre;
+    private String rematadorMatricula;
+    private Long segundosRestantes;
+    private Integer itemActivoId;
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -28,4 +32,12 @@ public class SubastaResumenDTO {
     public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
     public Integer getTotalItems() { return totalItems; }
     public void setTotalItems(Integer totalItems) { this.totalItems = totalItems; }
+    public String getRematadorNombre() { return rematadorNombre; }
+    public void setRematadorNombre(String rematadorNombre) { this.rematadorNombre = rematadorNombre; }
+    public String getRematadorMatricula() { return rematadorMatricula; }
+    public void setRematadorMatricula(String rematadorMatricula) { this.rematadorMatricula = rematadorMatricula; }
+    public Long getSegundosRestantes() { return segundosRestantes; }
+    public void setSegundosRestantes(Long segundosRestantes) { this.segundosRestantes = segundosRestantes; }
+    public Integer getItemActivoId() { return itemActivoId; }
+    public void setItemActivoId(Integer itemActivoId) { this.itemActivoId = itemActivoId; }
 }

@@ -17,12 +17,14 @@ public interface PujoRepository extends JpaRepository<Pujo, Integer> {
         """)
     List<Pujo> findByItemOrderByImporteDesc(@Param("itemId") Integer itemId);
 
-    // Todas las pujas del usuario en subastas activas
+    // Pujas no ganadoras del usuario en ítems aún activos de subastas abiertas (ordenadas mayor importe primero)
     @Query("""
         SELECT p FROM Pujo p
         WHERE p.asistente.cliente.identificador = :clienteId
         AND p.asistente.subasta.estado = 'abierta'
-        ORDER BY p.fechaHora DESC
+        AND p.ganador = 'no'
+        AND p.item.subastado = 'no'
+        ORDER BY p.importe DESC
         """)
     List<Pujo> findPujasActivasByCliente(@Param("clienteId") Integer clienteId);
 
@@ -36,10 +38,15 @@ public interface PujoRepository extends JpaRepository<Pujo, Integer> {
     List<Pujo> findPujasGanadasByCliente(@Param("clienteId") Integer clienteId);
 
     // La puja más alta de un ítem (para validaciones)
+    default Optional<Pujo> findMejorPujaByItem(Integer itemId) {
+        return findByItemOrderByImporteDesc(itemId).stream().findFirst();
+    }
+
+    // Pujas ganadoras de un ítem (ganador='si')
     @Query("""
         SELECT p FROM Pujo p
         WHERE p.item.identificador = :itemId
-        ORDER BY p.importe DESC
+        AND p.ganador = 'si'
         """)
-    Optional<Pujo> findMejorPujaByItem(@Param("itemId") Integer itemId);
+    List<Pujo> findPujasGanadoras(@Param("itemId") Integer itemId);
 }

@@ -1,5 +1,6 @@
 package com.next.subastas.dto;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class ItemDetalleDTO {
     private Integer id;
@@ -16,6 +17,10 @@ public class ItemDetalleDTO {
     private String monedaSubasta;
     private String loteNumero;
     private Long segundosRestantes;
+    private String duenioActual;
+    private List<Integer> fotoIds;
+    private List<PiezaDTO> piezas;
+    private boolean esItemActivo;
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -45,4 +50,14 @@ public class ItemDetalleDTO {
     public void setLoteNumero(String loteNumero) { this.loteNumero = loteNumero; }
     public Long getSegundosRestantes() { return segundosRestantes; }
     public void setSegundosRestantes(Long segundosRestantes) { this.segundosRestantes = segundosRestantes; }
+    public String getDuenioActual() { return duenioActual; }
+    public void setDuenioActual(String duenioActual) { this.duenioActual = duenioActual; }
+
+    public List<Integer> getFotoIds() { return fotoIds; }
+    public void setFotoIds(List<Integer> fotoIds) { this.fotoIds = fotoIds; }
+
+    public List<PiezaDTO> getPiezas() { return piezas; }
+    public void setPiezas(List<PiezaDTO> piezas) { this.piezas = piezas; }
+    public boolean isEsItemActivo() { return esItemActivo; }
+    public void setEsItemActivo(boolean esItemActivo) { this.esItemActivo = esItemActivo; }
 }

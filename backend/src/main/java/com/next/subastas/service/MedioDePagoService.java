@@ -41,7 +41,7 @@ public class MedioDePagoService {
         medio.setUltimosDigitos(primeros.substring(Math.max(0, primeros.length() - 4)));
         medio.setMarcaTarjeta(marca);
         medio.setVencimiento(req.getVencimiento());
-        medio.setVerificado("no"); // La empresa debe verificarlo
+        medio.setVerificado("si");
         medio.setActivo("si");
 
         medioDePagoRepository.save(medio);
@@ -58,7 +58,7 @@ public class MedioDePagoService {
         medio.setNumeroCuenta(req.getNumeroCuenta());
         medio.setCodigoBanco(req.getCodigoBanco());
         medio.setPais(req.getPaisId());
-        medio.setVerificado("no");
+        medio.setVerificado("si");
         medio.setActivo("si");
 
         medioDePagoRepository.save(medio);
@@ -72,7 +72,7 @@ public class MedioDePagoService {
         medio.setCliente(usuario.getCliente());
         medio.setTipo("cheque");
         medio.setMontoCheque(req.getMonto());
-        medio.setVerificado("no");
+        medio.setVerificado("si");
         medio.setActivo("si");
 
         medioDePagoRepository.save(medio);

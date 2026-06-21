@@ -19,6 +19,7 @@ public class ItemCatalogo {
     private BigDecimal comision;
     @Column(length = 2)
     private String subastado = "no";
+    private Integer duracionSegundos = 120;
 
     public Integer getIdentificador() { return identificador; }
     public void setIdentificador(Integer identificador) { this.identificador = identificador; }
@@ -32,4 +33,6 @@ public class ItemCatalogo {
     public void setComision(BigDecimal comision) { this.comision = comision; }
     public String getSubastado() { return subastado; }
     public void setSubastado(String subastado) { this.subastado = subastado; }
+    public Integer getDuracionSegundos() { return duracionSegundos != null ? duracionSegundos : 120; }
+    public void setDuracionSegundos(Integer duracionSegundos) { this.duracionSegundos = duracionSegundos; }
 }

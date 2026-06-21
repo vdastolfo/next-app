@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Para el emulador/Expo Go en la misma red: usá tu IP local (ej: 192.168.1.x)
 // Para web/emulador Android: http://10.0.2.2:8080
 const BASE_URL = 'http://10.0.2.2:8080/api';
+export const MEDIA_URL = 'http://10.0.2.2:8080';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -45,6 +46,8 @@ export const authAPI = {
     api.post('/auth/login', { email, password }),
   register: (data) =>
     api.post('/auth/register', data),
+  completeRegistration: (data) =>
+    api.post('/auth/complete-registration', data),
   verify: (email, codigo) =>
     api.post('/auth/verify', { email, codigo }),
   resendCode: (email) =>
@@ -53,7 +56,9 @@ export const authAPI = {
 
 // ── SUBASTAS ──────────────────────────────────────────────────────────────────
 export const auctionsAPI = {
-  list: () => api.get('/auctions'),
+  getAuctions: () => api.get('/auctions'),
+  getAuctionItems: (subastaId) => api.get(`/auctions/${subastaId}/items`),
+  list: () => api.get('/auctions/items'),
   search: (q, sort, category) =>
     api.get('/auctions/search', { params: { q, sort, category } }),
   getItem: (itemId) => api.get(`/auctions/items/${itemId}`),
@@ -61,12 +66,15 @@ export const auctionsAPI = {
     api.get(`/auctions/items/${itemId}/bid-preview`, { params: { amount } }),
   placeBid: (itemId, importe, medioDePagoId) =>
     api.post(`/auctions/items/${itemId}/bids`, { importe, medioDePagoId }),
+  setActiveItem: (subastaId, itemId) =>
+    api.put(`/auctions/${subastaId}/active-item`, { itemId }),
 };
 
 // ── ACTIVIDAD ─────────────────────────────────────────────────────────────────
 export const activityAPI = {
   getBidding: () => api.get('/user/activity/bidding'),
   getWon: () => api.get('/user/activity/won'),
+  payWon: (pujaId, medioDePagoId) => api.post(`/user/activity/won/${pujaId}/pay`, { medioDePagoId }),
 };
 
 // ── MÉTODOS DE PAGO ───────────────────────────────────────────────────────────

@@ -12,6 +12,8 @@ public class Cliente {
     private Persona persona;
     @Column(name = "numeroPais")
     private Integer numeroPais;
+    @Column(length = 100)
+    private String paisOrigen;
     @Column(length = 2)
     private String admitido;
     @Column(length = 10)
@@ -25,6 +27,8 @@ public class Cliente {
     public void setPersona(Persona persona) { this.persona = persona; }
     public Integer getNumeroPais() { return numeroPais; }
     public void setNumeroPais(Integer numeroPais) { this.numeroPais = numeroPais; }
+    public String getPaisOrigen() { return paisOrigen; }
+    public void setPaisOrigen(String paisOrigen) { this.paisOrigen = paisOrigen; }
     public String getAdmitido() { return admitido; }
     public void setAdmitido(String admitido) { this.admitido = admitido; }
     public String getCategoria() { return categoria; }

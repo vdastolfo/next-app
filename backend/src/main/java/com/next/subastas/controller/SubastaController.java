@@ -21,13 +21,55 @@ public class SubastaController {
 
     /**
      * GET /api/auctions
-     * Lista las subastas accesibles para el usuario logueado
-     * según su categoría.
+     * Lista las subastas abiertas. Para invitados: todas. Para usuarios: filtradas por categoría.
      */
     @GetMapping
     public ResponseEntity<List<SubastaResumenDTO>> listar(
             @AuthenticationPrincipal UserDetails user) {
+        if (user == null) {
+            return ResponseEntity.ok(subastaService.listarSubastasPublicas());
+        }
         return ResponseEntity.ok(subastaService.listarSubastas(user.getUsername()));
+    }
+
+    /**
+     * GET /api/auctions/{subastaId}/items
+     * Lista los ítems activos de una subasta específica.
+     */
+    @GetMapping("/{subastaId}/items")
+    public ResponseEntity<List<ItemDetalleDTO>> listarItemsDeSubasta(
+            @PathVariable Integer subastaId) {
+        return ResponseEntity.ok(subastaService.listarItemsDeSubasta(subastaId));
+    }
+
+    /**
+     * PUT /api/auctions/{subastaId}/active-item
+     * Establece el ítem actualmente en subasta (usado por el rematador).
+     * Body: { "itemId": 5 } — o { "itemId": null } para limpiar.
+     */
+    @PutMapping("/{subastaId}/active-item")
+    public ResponseEntity<?> setItemActivo(
+            @PathVariable Integer subastaId,
+            @RequestBody Map<String, Integer> body) {
+        try {
+            subastaService.setItemActivo(subastaId, body.get("itemId"));
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * GET /api/auctions/items
+     * Lista todos los lotes activos accesibles para el usuario (pantalla Home).
+     */
+    @GetMapping("/items")
+    public ResponseEntity<List<ItemDetalleDTO>> listarItems(
+            @AuthenticationPrincipal UserDetails user) {
+        if (user == null) {
+            return ResponseEntity.ok(subastaService.listarItemsPublicos());
+        }
+        return ResponseEntity.ok(subastaService.listarItemsAccesibles(user.getUsername()));
     }
 
     /**

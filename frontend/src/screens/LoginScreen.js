@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, KeyboardAvoidingView, Platform, Image
+  TouchableOpacity, KeyboardAvoidingView, Platform
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../services/AuthContext';
-import { Input, PrimaryButton, NextLogo, SecondaryButton } from '../components';
+import { Input, PrimaryButton, NextLogo } from '../components';
+import { paymentAPI } from '../services/api';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 
 export default function LoginScreen({ navigation }) {
@@ -16,7 +16,6 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // ── Validaciones ──────────────────────────────────────────────────────────
   const validate = () => {
     const newErrors = {};
 
@@ -44,15 +43,26 @@ export default function LoginScreen({ navigation }) {
 
     try {
       await login(email.trim().toLowerCase(), password);
+
+      // Si no tiene medios de pago, lo mandamos a registrar el primero
+      try {
+        const res = await paymentAPI.list();
+        if (!res.data || res.data.length === 0) {
+          navigation.reset({ index: 0, routes: [{ name: 'FirstPayment' }] });
+          return;
+        }
+      } catch {
+        // Si falla la consulta, dejamos pasar a Main igual
+      }
+
       navigation.navigate('Main');
-      // La navegación la maneja el Navigator según el estado de auth
     } catch (error) {
       if (error.isNetworkError) {
         setErrors({ general: 'Sin conexión a internet. Verificá tu red.' });
       } else if (error.response?.status === 401) {
         setErrors({ general: 'Email o contraseña incorrectos.' });
       } else if (error.response?.status === 403) {
-        setErrors({ general: 'Tu cuenta está desactivada. Contactá al soporte.' });
+        setErrors({ general: error.response?.data?.error || 'Tu cuenta no está activa aún.' });
       } else {
         setErrors({ general: 'Ocurrió un error. Intentá de nuevo.' });
       }
@@ -71,12 +81,10 @@ export default function LoginScreen({ navigation }) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Logo */}
         <View style={styles.logoContainer}>
           <NextLogo size={100} showText={true} />
         </View>
 
-        {/* Formulario */}
         <View style={styles.form}>
           <Input
             label="CORREO ELECTRÓNICO"
@@ -107,61 +115,41 @@ export default function LoginScreen({ navigation }) {
             onRightIconPress={() => setShowPassword(!showPassword)}
           />
 
-          {/* Link ¿Olvidaste tu contraseña? */}
           <TouchableOpacity style={styles.forgotContainer}>
             <Text style={styles.forgotText}>¿OLVIDASTE TU CONTRASEÑA?</Text>
           </TouchableOpacity>
 
-          {/* Error general */}
           {errors.general && (
             <View style={styles.errorBanner}>
               <Text style={styles.errorBannerText}>⚠ {errors.general}</Text>
             </View>
           )}
 
-          {/* Botón login */}
           <PrimaryButton
             title="Iniciar Sesión"
             onPress={handleLogin}
             loading={loading}
             style={styles.loginBtn}
           />
-
-          {/* Divisor */}
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>O CONTINUAR CON</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Social login */}
-          <View style={styles.socialRow}>
-            <SecondaryButton
-              title="Google"
-              onPress={() => {}}
-              style={styles.socialBtn}
-              icon={<Text style={{ fontSize: 18 }}>G</Text>}
-            />
-            <SecondaryButton
-              title="Apple"
-              onPress={() => {}}
-              style={styles.socialBtn}
-              icon={<Text style={{ fontSize: 18 }}>🍎</Text>}
-            />
-          </View>
         </View>
 
-        {/* Imagen de fondo inferior + crear cuenta */}
         <View style={styles.footer}>
           <View style={styles.footerBg} />
           <Text style={styles.footerText}>
-            ¿No tienes una cuenta?{' '}
-            <Text style={styles.footerLink}
-            onPress={() => navigation.navigate('Register')}
-            >
-              Crear cuenta
+            ¿No tenés cuenta?{' '}
+            <Text style={styles.footerLink} onPress={() => navigation.navigate('Register')}>
+              Solicitar registro
             </Text>
           </Text>
+          <TouchableOpacity
+            style={styles.completeRegLink}
+            onPress={() => navigation.navigate('CompleteRegistration')}
+          >
+            <Text style={styles.completeRegText}>
+              ¿Ya recibiste el mail de aprobación?{' '}
+              <Text style={styles.completeRegLinkText}>Completar registro</Text>
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -216,34 +204,11 @@ const styles = StyleSheet.create({
   loginBtn: {
     marginTop: SIZES.sm,
   },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: SIZES.lg,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: COLORS.cardAlt,
-  },
-  dividerText: {
-    color: COLORS.textMuted,
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: SIZES.textXs,
-    letterSpacing: 1.5,
-    marginHorizontal: SIZES.md,
-  },
-  socialRow: {
-    flexDirection: 'row',
-    gap: SIZES.md,
-  },
-  socialBtn: {
-    flex: 1,
-  },
   footer: {
     alignItems: 'center',
     paddingVertical: SIZES.xl,
     marginTop: SIZES.lg,
+    gap: SIZES.md,
   },
   footerBg: {
     position: 'absolute',
@@ -258,6 +223,19 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     color: COLORS.secondary,
+    fontFamily: FONTS.bodySemiBold,
+  },
+  completeRegLink: {
+    padding: SIZES.xs,
+  },
+  completeRegText: {
+    color: COLORS.textMuted,
+    fontFamily: FONTS.bodyRegular,
+    fontSize: SIZES.textXs,
+    textAlign: 'center',
+  },
+  completeRegLinkText: {
+    color: COLORS.accent1,
     fontFamily: FONTS.bodySemiBold,
   },
 });

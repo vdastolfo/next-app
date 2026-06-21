@@ -40,6 +40,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Endpoints públicos (no requieren token)
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/fotos/**").permitAll()
+                .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/api/auctions", "/api/auctions/items", "/api/auctions/items/**").permitAll()
+                .requestMatchers("/api/auctions/*/items").permitAll()
                 // Todo lo demás requiere autenticación
                 .anyRequest().authenticated()
             )

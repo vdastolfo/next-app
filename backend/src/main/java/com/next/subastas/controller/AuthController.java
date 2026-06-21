@@ -1,5 +1,6 @@
 package com.next.subastas.controller;
 
+import com.next.subastas.dto.CompleteRegistrationRequest;
 import com.next.subastas.dto.LoginRequest;
 import com.next.subastas.dto.LoginResponse;
 import com.next.subastas.dto.RegisterRequest;
@@ -36,17 +37,50 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
-        System.out.println(">>> REGISTER REQUEST: " + request.getEmail());
         try {
             String email = authService.register(request);
-            System.out.println(">>> REGISTER OK: " + email);
             return ResponseEntity.status(201).body(Map.of("email", email));
         } catch (DataIntegrityViolationException e) {
-            System.out.println(">>> REGISTER 409: " + e.getMessage());
-            return ResponseEntity.status(409).body(Map.of("error", e.getMessage()));
+            String msg = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+            if (msg.contains("email") || msg.contains("unique") || msg.contains("ya existe")) {
+                return ResponseEntity.status(409).body(Map.of("error", "Ya existe una solicitud con ese correo."));
+            }
+            return ResponseEntity.status(400).body(Map.of("error", "Error de datos: " + e.getMostSpecificCause().getMessage()));
         } catch (Exception e) {
-            System.out.println(">>> REGISTER ERROR: " + e.getClass().getName() + " - " + e.getMessage());
-            return ResponseEntity.status(400).body(Map.of("error", "Error al crear la cuenta: " + e.getMessage()));
+            return ResponseEntity.status(400).body(Map.of("error", "Error al registrar: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/complete-registration")
+    public ResponseEntity<?> completeRegistration(@Valid @RequestBody CompleteRegistrationRequest request) {
+        try {
+            LoginResponse response = authService.completeRegistration(request);
+            return ResponseEntity.ok(response);
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Endpoint de uso interno para que el administrador apruebe un postor
+    @PostMapping("/admin/approve")
+    public ResponseEntity<?> adminApprove(@RequestBody Map<String, String> body) {
+        try {
+            authService.approveAndSendCode(body.get("email"));
+            return ResponseEntity.ok(Map.of("message", "Usuario aprobado. Se envió el email de completación."));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/admin/approve/{email}")
+    public ResponseEntity<?> adminApproveGet(@PathVariable String email) {
+        try {
+            authService.approveAndSendCode(email);
+            return ResponseEntity.ok(Map.of("message", "Usuario aprobado. Se envió el email de completación a " + email));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
         }
     }
 

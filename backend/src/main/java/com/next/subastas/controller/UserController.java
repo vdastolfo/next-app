@@ -40,6 +40,28 @@ class ActividadController {
             @AuthenticationPrincipal UserDetails user) {
         return ResponseEntity.ok(subastaService.getPujasGanadas(user.getUsername()));
     }
+
+    /**
+     * POST /api/user/activity/won/{pujaId}/pay
+     * Registrar pago de una puja ganada
+     * Body: { "medioDePagoId": 5 }
+     */
+    @PostMapping("/won/{pujaId}/pay")
+    public ResponseEntity<?> pagar(
+            @PathVariable Integer pujaId,
+            @RequestBody Map<String, Integer> body,
+            @AuthenticationPrincipal UserDetails user) {
+        try {
+            Integer medioDePagoId = body.get("medioDePagoId");
+            if (medioDePagoId == null) {
+                return ResponseEntity.status(400).body(java.util.Map.of("error", "Se requiere medioDePagoId"));
+            }
+            subastaService.pagarPujaGanada(pujaId, medioDePagoId, user.getUsername());
+            return ResponseEntity.ok(java.util.Map.of("mensaje", "Pago registrado"));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
 }
 
 // =============================================

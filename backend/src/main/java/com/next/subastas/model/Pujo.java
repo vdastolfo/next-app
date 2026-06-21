@@ -21,6 +21,13 @@ public class Pujo {
     private String ganador = "no";
     @Column(nullable = false)
     private LocalDateTime fechaHora = LocalDateTime.now();
+    @Column(length = 20)
+    private String estadoPago;
+    @Column(length = 30)
+    private String estadoPaquete;
+    @ManyToOne
+    @JoinColumn(name = "medioDePago")
+    private MedioDePago medioDePago;
 
     public Integer getIdentificador() { return identificador; }
     public void setIdentificador(Integer identificador) { this.identificador = identificador; }
@@ -34,4 +41,10 @@ public class Pujo {
     public void setGanador(String ganador) { this.ganador = ganador; }
     public LocalDateTime getFechaHora() { return fechaHora; }
     public void setFechaHora(LocalDateTime fechaHora) { this.fechaHora = fechaHora; }
+    public String getEstadoPago() { return estadoPago; }
+    public void setEstadoPago(String estadoPago) { this.estadoPago = estadoPago; }
+    public String getEstadoPaquete() { return estadoPaquete; }
+    public void setEstadoPaquete(String estadoPaquete) { this.estadoPaquete = estadoPaquete; }
+    public MedioDePago getMedioDePago() { return medioDePago; }
+    public void setMedioDePago(MedioDePago medioDePago) { this.medioDePago = medioDePago; }
 }

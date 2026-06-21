@@ -1,11 +1,13 @@
 package com.next.subastas.dto;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class PujaActivaDTO {
     private Integer pujaId;
     private Integer itemId;
     private String nombreProducto;
     private String imagenUrl;
+    private List<Integer> fotoIds;
     private BigDecimal tuPuja;
     private BigDecimal mejorPuja;
     private boolean eresElMejor;
@@ -21,6 +23,8 @@ public class PujaActivaDTO {
     public void setNombreProducto(String nombreProducto) { this.nombreProducto = nombreProducto; }
     public String getImagenUrl() { return imagenUrl; }
     public void setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
+    public List<Integer> getFotoIds() { return fotoIds; }
+    public void setFotoIds(List<Integer> fotoIds) { this.fotoIds = fotoIds; }
     public BigDecimal getTuPuja() { return tuPuja; }
     public void setTuPuja(BigDecimal tuPuja) { this.tuPuja = tuPuja; }
     public BigDecimal getMejorPuja() { return mejorPuja; }

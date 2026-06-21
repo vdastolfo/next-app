@@ -1,6 +1,7 @@
 package com.next.subastas.model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -14,7 +15,9 @@ public class Subasta {
     private LocalTime hora;
     @Column(length = 10)
     private String estado;
-    private Integer subastador;
+    @ManyToOne
+    @JoinColumn(name = "subastador", nullable = false)
+    private Subastador subastador;
     @Column(length = 350)
     private String ubicacion;
     private Integer capacidadAsistentes;
@@ -26,6 +29,9 @@ public class Subasta {
     private String categoria;
     @Column(length = 10, nullable = false)
     private String moneda = "pesos";
+    private Integer duracionMinutos;
+    private LocalDateTime fechaFin;
+    private Integer itemActivo;
 
     public Integer getIdentificador() { return identificador; }
     public void setIdentificador(Integer identificador) { this.identificador = identificador; }
@@ -35,8 +41,8 @@ public class Subasta {
     public void setHora(LocalTime hora) { this.hora = hora; }
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
-    public Integer getSubastador() { return subastador; }
-    public void setSubastador(Integer subastador) { this.subastador = subastador; }
+    public Subastador getSubastador() { return subastador; }
+    public void setSubastador(Subastador subastador) { this.subastador = subastador; }
     public String getUbicacion() { return ubicacion; }
     public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
     public Integer getCapacidadAsistentes() { return capacidadAsistentes; }
@@ -49,4 +55,10 @@ public class Subasta {
     public void setCategoria(String categoria) { this.categoria = categoria; }
     public String getMoneda() { return moneda; }
     public void setMoneda(String moneda) { this.moneda = moneda; }
+    public Integer getDuracionMinutos() { return duracionMinutos; }
+    public void setDuracionMinutos(Integer duracionMinutos) { this.duracionMinutos = duracionMinutos; }
+    public LocalDateTime getFechaFin() { return fechaFin; }
+    public void setFechaFin(LocalDateTime fechaFin) { this.fechaFin = fechaFin; }
+    public Integer getItemActivo() { return itemActivo; }
+    public void setItemActivo(Integer itemActivo) { this.itemActivo = itemActivo; }
 }
